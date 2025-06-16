@@ -13,6 +13,7 @@
     "cesium": "^1.130.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-hot-toast": "^2.5.2",
     "resium": "^1.19.0-beta.1",
     "satellite.js": "^6.0.0"
   },

@@ -3,9 +3,14 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import 'cesium/Build/Cesium/Widgets/widgets.css';
+import { Toaster } from "react-hot-toast";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
-)
+    <>
+      <App />
+      <Toaster position="bottom-right" />
+    </>
+  </StrictMode>
+);
+
