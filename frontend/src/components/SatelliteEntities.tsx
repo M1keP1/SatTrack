@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Entity } from "resium";
 import { Color, Cartesian2 } from "cesium";
+import toast from "react-hot-toast";
 
 import { parseTleText } from "../utils/tleParser";
 import type { TleEntry } from "../utils/tleParser";
@@ -13,45 +14,77 @@ export default function SatelliteEntities() {
   const trackedSatIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    let interval: NodeJS.Timer;
+    let fileCheckInterval: ReturnType<typeof setInterval>;
+    let positionUpdateInterval: ReturnType<typeof setInterval>;
     let lastTleRaw: string | null = null;
+    let currentTles: TleEntry[] = [];
 
     const trackedSatIds = trackedSatIdsRef.current;
 
-    async function loadAndTrack() {
+    const loadTleFile = async () => {
       try {
         const res = await fetch("/data/active_tles.txt", { cache: "no-store" });
         const text = await res.text();
 
-        if (text === lastTleRaw) {
-          return; // 🔁 no changes, skip reprocessing
+        if (text === lastTleRaw) return; // No change
+        lastTleRaw = text;
+
+        currentTles = parseTleText(text);
+        console.log(`📂 TLE file updated — loaded ${currentTles.length} entries`);
+        
+
+        const newPositions = getSatellitePositions(currentTles);
+        const newIds = new Set(newPositions.map((s) => s.id));
+
+        const added = [...newIds].filter((id) => !trackedSatIds.has(id));
+        const removed = [...trackedSatIds].filter((id) => !newIds.has(id));
+
+        if (added.length || removed.length) {
+          toast.success(`🔄 ${added.length} added, ${removed.length} removed`);
         }
 
-        lastTleRaw = text;
-        const tles: TleEntry[] = parseTleText(text);
-        console.log(`📂 TLE file updated — loaded ${tles.length} entries`);
-
-        const newPositions = getSatellitePositions(tles);
-
-        newPositions.forEach((sat) => {
-          if (sat.position && !trackedSatIds.has(sat.id)) {
-            console.log(`🛰️ Tracking: ${sat.name}`);
-            trackedSatIds.add(sat.id);
-          }
+        added.forEach((id) => {
+          const sat = newPositions.find((s) => s.id === id);
+          console.log(`🛰️ Tracking satellite: ${sat?.name} [${id}]`);
+          toast.success(`🛰️ Tracking: ${sat?.name}`);
+          trackedSatIds.add(id);
         });
 
+        removed.forEach((id) => {
+          
+          console.log(`❌ Lost satellite: ${id}`);
+          toast.error(`❌ Lost tracking of some satellite`);
+          trackedSatIds.delete(id);
+        });
+
+        // Also immediately update positions
         setSatellites(newPositions);
       } catch (err) {
         console.error("❌ Failed to fetch TLE file:", err);
+        toast.error("❌ Failed to load TLE data.");
       }
-    }
+    };
 
-    loadAndTrack(); // initial
-    interval = setInterval(loadAndTrack, 500); // every 5 seconds
+    const updatePositions = () => {
+      if (!currentTles.length) return;
+      const updated = getSatellitePositions(currentTles);
+      setSatellites(updated);
+    };
 
-    return () => clearInterval(interval);
+    // Initial run
+    loadTleFile();
+    updatePositions();
+
+    // Set intervals
+    fileCheckInterval = setInterval(loadTleFile, 10000); // every 10s
+    positionUpdateInterval = setInterval(updatePositions, 1000); // every 1s
+
+    return () => {
+      clearInterval(fileCheckInterval);
+      clearInterval(positionUpdateInterval);
+    };
   }, []);
-    
+
   return (
     <>
       {satellites.map((sat) =>

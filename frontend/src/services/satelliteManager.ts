@@ -13,6 +13,14 @@ export function computePositionFromTLE(tle: TleEntry): SatellitePosition {
   const date = new Date();
 
   const posVel = propagate(satrec, date);
+  if (!posVel || !posVel.position) {
+    return {
+      name: tle.name,
+      id: tle.line1.split(" ")[1],
+      position: null,
+    };
+  }
+
   if (!posVel.position) return { name: tle.name, id: tle.line1.split(" ")[1], position: null };
 
   const gmst = gstime(date);
