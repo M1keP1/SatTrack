@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { parseTleText } from "../utils/tleParser";
 import { getSatellitePositions } from "../services/satelliteManager";
 import type { SatellitePosition } from "../services/satelliteManager";
+import { getActiveTleFile } from "../services/activeCollection";
 import type { TleEntry } from "../utils/tleParser";
 import toast from "react-hot-toast";
 
@@ -17,7 +18,7 @@ export function useSatelliteTracker(setSatellites: (sats: SatellitePosition[]) =
 
     const loadTleFile = async () => {
       try {
-        const res = await fetch("/data/active_tles.txt", { cache: "no-store" });
+        const res = await fetch(getActiveTleFile(), { cache: "no-store" });
         const text = await res.text();
 
         if (text === lastTleRawRef.current) return;
@@ -55,7 +56,7 @@ export function useSatelliteTracker(setSatellites: (sats: SatellitePosition[]) =
 
     loadTleFile();
     updatePositions();
-    fileCheckInterval = setInterval(loadTleFile, 10000);
+    fileCheckInterval = setInterval(loadTleFile, 1000);
     positionUpdateInterval = setInterval(updatePositions, 10);
 
     return () => {

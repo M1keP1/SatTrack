@@ -3,6 +3,7 @@ import SearchBar from "./SearchBar";
 import "./LeftSideBar.css";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { FaSatellite } from "react-icons/fa";
+import CollectionsPanel from "./Collections/CollectionsPanel";
 
 type SidebarProps = {
   onSearch: (query: string) => void;
@@ -29,6 +30,7 @@ export default function Sidebar({ onSearch, satelliteNames }: SidebarProps) {
             onSearch={onSearch} 
             suggestions={satelliteNames}
             />
+            <CollectionsPanel />
 
           </div>
         </div>
