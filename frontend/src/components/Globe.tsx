@@ -1,10 +1,8 @@
 import { Viewer } from "resium";
-import { Ion, Color } from "cesium";
-import { useEffect } from "react";
+import { Ion } from "cesium";
 import SatelliteEntities from "./SatelliteEntities";
 import type { Viewer as CesiumViewer } from "cesium";
 import type { SatellitePosition } from "../services/satelliteManager";
-
 
 Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwOTkzNWYyMS1mMDIzLTRhMWItYWIxZS0wZjdmM2UzZDExYTYiLCJpZCI6MzAzMzk1LCJpYXQiOjE3NDc1MTc4MzB9.xVdwgbTzZJ1XrAk3BCb2K1W4lfkEpNUfAALkXe8pElA";
 
@@ -15,14 +13,7 @@ type GlobeProps = {
   trackedId: string | null;
 };
 
-export default function Globe({ viewerRef, satellites, setSatellites,trackedId }: GlobeProps) {
-  useEffect(() => {
-    if (viewerRef.current) {
-      viewerRef.current.scene.skyBox.show = false;
-      viewerRef.current.scene.skyAtmosphere.show = false;
-      viewerRef.current.scene.backgroundColor = Color.BLACK;
-    }
-  }, [viewerRef]);
+const Globe: React.FC<GlobeProps> = ({ viewerRef, satellites, setSatellites, trackedId }) => {
 
   return (
     <Viewer
@@ -51,4 +42,6 @@ export default function Globe({ viewerRef, satellites, setSatellites,trackedId }
       />
     </Viewer>
   );
-}
+};
+
+export default Globe;
