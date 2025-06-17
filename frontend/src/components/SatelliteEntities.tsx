@@ -9,15 +9,21 @@ import type { TleEntry } from "../utils/tleParser";
 import { getSatellitePositions } from "../services/satelliteManager";
 import type { SatellitePosition } from "../services/satelliteManager";
 
-export default function SatelliteEntities() {
-  const [satellites, setSatellites] = useState<SatellitePosition[]>([]);
+type Props = {
+  satellites: SatellitePosition[];
+  setSatellites: (data: SatellitePosition[]) => void;
+  trackedId: string | null;
+};
+
+export default function SatelliteEntities({ satellites, setSatellites, trackedId }: Props) {
   const trackedSatIdsRef = useRef<Set<string>>(new Set());
+  const currentTlesRef = useRef<TleEntry[]>([]);
+  const entityRefs = useRef<Record<string, Cesium.Entity>>({});
 
   useEffect(() => {
     let fileCheckInterval: ReturnType<typeof setInterval>;
     let positionUpdateInterval: ReturnType<typeof setInterval>;
     let lastTleRaw: string | null = null;
-    let currentTles: TleEntry[] = [];
 
     const trackedSatIds = trackedSatIdsRef.current;
 
@@ -26,14 +32,13 @@ export default function SatelliteEntities() {
         const res = await fetch("/data/active_tles.txt", { cache: "no-store" });
         const text = await res.text();
 
-        if (text === lastTleRaw) return; // No change
+        if (text === lastTleRaw) return;
         lastTleRaw = text;
 
-        currentTles = parseTleText(text);
-        console.log(`📂 TLE file updated — loaded ${currentTles.length} entries`);
-        
+        const tles = parseTleText(text);
+        currentTlesRef.current = tles;
 
-        const newPositions = getSatellitePositions(currentTles);
+        const newPositions = getSatellitePositions(tles);
         const newIds = new Set(newPositions.map((s) => s.id));
 
         const added = [...newIds].filter((id) => !trackedSatIds.has(id));
@@ -45,45 +50,54 @@ export default function SatelliteEntities() {
 
         added.forEach((id) => {
           const sat = newPositions.find((s) => s.id === id);
-          console.log(`🛰️ Tracking satellite: ${sat?.name} [${id}]`);
-          toast.success(`🛰️ Tracking: ${sat?.name}`);
+          console.log(`🛰️ Tracking: ${sat?.name} [${id}]`);
           trackedSatIds.add(id);
         });
 
         removed.forEach((id) => {
-          
-          console.log(`❌ Lost satellite: ${id}`);
-          toast.error(`❌ Lost tracking of some satellite`);
+          console.log(`❌ Lost: ${id}`);
           trackedSatIds.delete(id);
         });
 
-        // Also immediately update positions
         setSatellites(newPositions);
       } catch (err) {
-        console.error("❌ Failed to fetch TLE file:", err);
-        toast.error("❌ Failed to load TLE data.");
+        console.error("❌ Failed to fetch TLE:", err);
+        toast.error("❌ Failed to load TLE file.");
       }
     };
 
     const updatePositions = () => {
-      if (!currentTles.length) return;
-      const updated = getSatellitePositions(currentTles);
+      const tles = currentTlesRef.current;
+      if (!tles.length) return;
+      const updated = getSatellitePositions(tles);
       setSatellites(updated);
     };
 
-    // Initial run
     loadTleFile();
     updatePositions();
 
-    // Set intervals
-    fileCheckInterval = setInterval(loadTleFile, 10000); // every 10s
-    positionUpdateInterval = setInterval(updatePositions, 1000); // every 1s
+    fileCheckInterval = setInterval(loadTleFile, 10000);
+    positionUpdateInterval = setInterval(updatePositions, 10);
 
     return () => {
       clearInterval(fileCheckInterval);
       clearInterval(positionUpdateInterval);
     };
-  }, []);
+  }, [setSatellites]);
+
+  // Follow the tracked satellite (set viewer's trackedEntity)
+  useEffect(() => {
+    const viewer = (window as any).cesiumViewer as Cesium.Viewer | undefined;
+    if (!viewer || !trackedId) return;
+
+    const trackedEntity = entityRefs.current[trackedId];
+    if (trackedEntity) {
+      viewer.trackedEntity = trackedEntity;
+      toast.success(`🎯 Following: ${trackedEntity.name}`);
+    } else {
+      viewer.trackedEntity = undefined;
+    }
+  }, [trackedId]);
 
   return (
     <>
@@ -93,6 +107,11 @@ export default function SatelliteEntities() {
             key={sat.id}
             name={sat.name}
             position={sat.position}
+            ref={(e) => {
+              if (e && e.cesiumElement) {
+                entityRefs.current[sat.id] = e.cesiumElement;
+              }
+            }}
             point={{ pixelSize: 10, color: Color.WHITE }}
             label={{
               text: sat.name,
