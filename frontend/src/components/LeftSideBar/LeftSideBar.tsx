@@ -1,7 +1,6 @@
 import { useState } from "react";
 import SearchBar from "./SearchBar";
-import "./LeftSideBar.css";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiChevronLeft } from "react-icons/fi";
 import { FaSatellite } from "react-icons/fa";
 import CollectionsPanel from "./Collections/CollectionsPanel";
 
@@ -10,35 +9,50 @@ type SidebarProps = {
   satelliteNames: string[];
 };
 
-
 export default function Sidebar({ onSearch, satelliteNames }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className={`sidebar-container ${collapsed ? "collapsed" : ""}`}>
-      {!collapsed ? (
-        <div className="sidebar-content">
-          <div className="sidebar-header">
-            <FaSatellite size={20} />
-            <span className="logo-text">SatTrack</span>
-            <button className="collapse-btn" onClick={() => setCollapsed(true)}>
+    <>
+      {/* Expanded Sidebar */}
+      {!collapsed && (
+        <div className="fixed top-0 left-0 w-72 h-full z-50 bg-cyan-900/30 backdrop-blur-md text-white shadow-xl flex flex-col transition-all">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-white/10">
+            <div className="flex items-center gap-2 font-bold text-lg">
+              <FaSatellite />
+              <span>SatTrack</span>
+            </div>
+            <button
+              onClick={() => setCollapsed(true)}
+              className="text-white/80 hover:text-white"
+            >
               <FiChevronLeft size={18} />
             </button>
           </div>
-          <div className="sidebar-body">
-            <SearchBar 
-            onSearch={onSearch} 
-            suggestions={satelliteNames}
-            />
-            <CollectionsPanel />
 
+          {/* Body */}
+          <div className="flex flex-col gap-4 p-4 overflow-y-auto">
+            <SearchBar onSearch={onSearch} suggestions={satelliteNames} />
+
+            <div className="bg-cyan-700/20 border border-cyan-300/20 backdrop-blur-sm rounded-xl p-4 shadow-sm w-full max-h-[70vh] overflow-y-auto">
+              <CollectionsPanel />
+            </div>
           </div>
         </div>
-      ) : (
-        <button className="expand-btn" onClick={() => setCollapsed(false)}>
-          <FiChevronRight size={20} />
+      )}
+
+      {/* Collapsed Floating Button */}
+      {collapsed && (
+        <button
+          onClick={() => setCollapsed(false)}
+          className="fixed top-4 left-2 z-50 p-2 rounded-full shadow-md
+                     bg-cyan-800/30 backdrop-blur-md border border-cyan-300/20
+                     text-white hover:bg-cyan-600/40 transition"
+        >
+          <FaSatellite size={18} />
         </button>
       )}
-    </div>
+    </>
   );
 }

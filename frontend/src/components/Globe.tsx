@@ -40,7 +40,11 @@ const Globe: React.FC<GlobeProps> = ({ viewerRef, satellites, setSatellites, tra
       setSatellites={setSatellites}
       trackedId={trackedId} 
       />
+    
+
     </Viewer>
+    
+
   );
 };
 
