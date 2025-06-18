@@ -35,9 +35,13 @@ export default function Sidebar({ onSearch, satelliteNames }: SidebarProps) {
           </div>
         </div>
       ) : (
-        <button className="expand-btn" onClick={() => setCollapsed(false)}>
-          <FiChevronRight size={20} />
-        </button>
+        <>
+          <button className="expand-btn" onClick={() => setCollapsed(false)}>
+            <FiChevronRight size={20} />
+          </button>
+          
+        </>
+
       )}
     </div>
   );
