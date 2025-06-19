@@ -3,6 +3,7 @@ import SearchBar from "./SearchBar";
 import { FiChevronLeft } from "react-icons/fi";
 import { FaSatellite } from "react-icons/fa";
 import CollectionsPanel from "./Collections/CollectionsPanel";
+import { GroundStationPanel } from "./GroundStationPanel/GroundStationPanel";
 
 type SidebarProps = {
   onSearch: (query: string) => void;
@@ -34,7 +35,9 @@ export default function Sidebar({ onSearch, satelliteNames }: SidebarProps) {
           {/* Body */}
           <div className="flex flex-col gap-4 p-4 overflow-y-auto">
             <SearchBar onSearch={onSearch} suggestions={satelliteNames} />
-
+            <GroundStationPanel />
+            
+            {/* Collections Panel */}
             <div className="bg-cyan-700/20 border border-cyan-300/20 backdrop-blur-sm rounded-xl p-4 shadow-sm w-full max-h-[70vh] overflow-y-auto">
               <CollectionsPanel />
             </div>
