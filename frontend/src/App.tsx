@@ -26,6 +26,7 @@ function App() {
       <Sidebar
         onSearch={handleSearch}
         satelliteNames={satellites.map((s) => s.name)}
+        viewerRef={viewerRef}
       />
     </div>
   );

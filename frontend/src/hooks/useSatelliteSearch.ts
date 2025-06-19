@@ -1,7 +1,7 @@
 // src/hooks/useSatelliteSearch.ts
-import { IonGeocoderService } from "cesium";
 import type { Viewer } from "cesium";
 import type { SatellitePosition } from "../services/satelliteManager";
+import { geocodeAndFlyTo } from "../services/geocodeAndFlyTo";
 
 export function useSatelliteSearch(
   viewerRef: React.RefObject<Viewer | null>,
@@ -39,23 +39,7 @@ export function useSatelliteSearch(
 
       return;
     }
-
     console.log("🌍 Attempting geocode for:", trimmed);
-    const geocoderService = new IonGeocoderService({ scene: viewerRef.current.scene });
-    const results = await geocoderService.geocode(trimmed);
-
-    if (results.length > 0) {
-      console.log("📍 Geocode result:", results[0].displayName);
-      viewerRef.current.trackedEntity = undefined;
-      setTrackedId(null);
-
-      viewerRef.current.camera.flyTo({
-        destination: results[0].destination,
-        duration: 6,
-      });
-      
-    } else {
-      console.warn("❌ No geocode results found.");
-    }
+    geocodeAndFlyTo(viewerRef.current, trimmed, 10);
   };
 }

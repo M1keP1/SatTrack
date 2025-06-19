@@ -4,33 +4,30 @@ import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-
+import type { RefObject } from "react";
+import type { Viewer } from "cesium";
+import { geocodeAndFlyTo } from "@/services/geocodeAndFlyTo";
+import { getCoordinatesByName } from "@/services/getCoordinatesByName";
 interface GroundStationPanelProps {
+  viewerRef: RefObject<Viewer | null>;
   onGroundStationChange?: (location: { lat: number; lon: number; name: string } | null) => void;
   visibleFromGroundStation?: number;
 }
 
-export function GroundStationPanel({ onGroundStationChange }: GroundStationPanelProps) {
+export function GroundStationPanel({ viewerRef, onGroundStationChange }: GroundStationPanelProps) {
   const [groundStationActive, setGroundStationActive] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number; name: string } | null>(null);
   const [locationQuery, setLocationQuery] = useState("");
 
-  const predefinedLocations: Record<string, { lat: number; lon: number }> = {
-    darmstadt: { lat: 49.8728, lon: 8.6512 },
-    frankfurt: { lat: 50.1109, lon: 8.6821 },
-    hamburg: { lat: 53.5488, lon: 9.9872 },
-    berlin: { lat: 52.5200, lon: 13.4050 },
-    munich: { lat: 48.1351, lon: 11.5820 },
-    london: { lat: 51.5074, lon: -0.1278 },
-    paris: { lat: 48.8566, lon: 2.3522 },
-    tokyo: { lat: 35.6762, lon: 139.6503 },
-  };
 
   const fallbackLocation = () => {
-    const fallback = { lat: 49.8728, lon: 8.6512, name: "Darmstadt (Default)" };
+    const fallback = { lat: 49.8728, lon: 8.6512, name: "Darmstadt" };
     setUserLocation(fallback);
     setGroundStationActive(true);
     onGroundStationChange?.(fallback);
+    if (viewerRef.current) {
+      geocodeAndFlyTo(viewerRef.current, fallback.name, 10);
+    }
     toast("📍 Fallback to Darmstadt");
   };
 
@@ -38,11 +35,19 @@ export function GroundStationPanel({ onGroundStationChange }: GroundStationPanel
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude, name: "Current Location" };
+          const loc = {
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude,
+            name: "Darmstadt", // Default dummy name, can be updated later
+          };
           setUserLocation(loc);
           setGroundStationActive(true);
           onGroundStationChange?.(loc);
-          toast.success("📍 Using current location");
+          if (viewerRef.current) {
+            geocodeAndFlyTo(viewerRef.current,loc.name,10);
+          }
+          console.log("📍 [User Location] Called geocodeAndFlyTo with:", loc.name);
+          toast.success(`📡 Ground station set to ${loc.name}`);
         },
         fallbackLocation
       );
@@ -50,6 +55,7 @@ export function GroundStationPanel({ onGroundStationChange }: GroundStationPanel
       fallbackLocation();
     }
   };
+
 
   const handleSetLocationClick = () => {
     if (groundStationActive) {
@@ -62,19 +68,38 @@ export function GroundStationPanel({ onGroundStationChange }: GroundStationPanel
     }
   };
 
-  const setLocationFromQuery = () => {
-    const cityKey = locationQuery.trim().toLowerCase();
-    const coords = predefinedLocations[cityKey];
-    if (coords) {
-      const location = { ...coords, name: locationQuery.trim() };
-      setUserLocation(location);
-      setGroundStationActive(true);
-      onGroundStationChange?.(location);
-      toast.success(`📍 Location set to ${location.name}`);
-    } else {
-      toast.error(`❌ "${locationQuery}" not found`);
+  const setLocationFromQuery = async () => {
+    const trimmed = locationQuery.trim();
+    const cleaned = trimmed.replace(/^["']|["']$/g, ""); // Remove quotes
+
+    if (!cleaned) return;
+
+    try {
+      console.log("📡 [Manual Location] Attempting geocode:", cleaned);
+      
+      let success = false;
+      if (viewerRef.current) {
+        success = await geocodeAndFlyTo(viewerRef.current, cleaned, 10);
+      }
+
+      if (success) {
+        const coords = await getCoordinatesByName(viewerRef.current!, cleaned);
+        const location = coords
+          ? { lat: coords.lat, lon: coords.lon, name: cleaned }
+          : { lat: 0, lon: 0, name: cleaned }; // fallback if coords not found
+        setUserLocation(location);
+        setGroundStationActive(true);
+        onGroundStationChange?.(location);
+        toast.success(`📡 Ground station set to ${location.name}`);
+      } else {
+        toast.error(`❌ "${cleaned}" not found`);
+      }
+    } catch (err) {
+      console.error("❌ Geocode error:", err);
+      toast.error("❌ Could not set location");
     }
   };
+
 
   const containerClass = cn(
     "rounded-xl p-4 border backdrop-blur-sm text-white space-y-4 transition",
@@ -83,7 +108,6 @@ export function GroundStationPanel({ onGroundStationChange }: GroundStationPanel
 
   return (
     <div className={containerClass}>
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 font-semibold text-sm">
           <FaMapMarkerAlt className="text-green-400" />
@@ -102,7 +126,6 @@ export function GroundStationPanel({ onGroundStationChange }: GroundStationPanel
         </Button>
       </div>
 
-      {/* Search Field (always visible) */}
       <div className="space-y-2 text-sm">
         <div className="text-white/60 text-xs">Search Location:</div>
         <div className="flex gap-2">
@@ -126,7 +149,6 @@ export function GroundStationPanel({ onGroundStationChange }: GroundStationPanel
         </div>
       </div>
 
-      {/* Info */}
       {groundStationActive && userLocation && (
         <div className="space-y-2 text-xs text-white/70">
           <div className="flex justify-between">
