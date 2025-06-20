@@ -6,6 +6,7 @@ import Sidebar from "./components/LeftSideBar/LeftSideBar";
 import { useSatelliteSearch } from "./hooks/useSatelliteSearch";
 import { useClickOutside } from "./hooks/useClickOutside";
 import type { SatellitePosition } from "./services/satelliteManager";
+import { ModularInfoSidebar } from "./components/RightSideBar/modular-info-sidebar";
 
 function App() {
   const viewerRef = useRef<Viewer | null>(null);
@@ -28,6 +29,7 @@ function App() {
         satelliteNames={satellites.map((s) => s.name)}
         viewerRef={viewerRef}
       />
+      <ModularInfoSidebar selectedSatellite={null} />
     </div>
   );
 }
