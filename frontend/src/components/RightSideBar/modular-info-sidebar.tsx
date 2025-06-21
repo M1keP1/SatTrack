@@ -3,24 +3,18 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { SatelliteInfoPanel } from "./satellite-info-panel";
 import { AIChatComponent } from "./ai-chat-component";
-
-interface SatelliteInfo {
-  noradId: number;
-  name: string;
-  longitude: number;
-  latitude: number;
-  altitude: number;
-  satelliteType: string;
-  operator: string;
-}
+import { useSatelliteDetails } from "@/hooks/useSatelliteDetails";
 
 interface ModularInfoSidebarProps {
-  selectedSatellite: SatelliteInfo | null;
+  selectedNoradId: string | null;
   onExpandedChange?: (expanded: boolean) => void;
 }
 
-export function ModularInfoSidebar({ selectedSatellite }: ModularInfoSidebarProps) {
+export function ModularInfoSidebar({ selectedNoradId }: ModularInfoSidebarProps) {
   const [aiExpanded, setAiExpanded] = useState(false);
+console.log("ModularInfoSidebar received:", selectedNoradId);
+const satellite = useSatelliteDetails(selectedNoradId);
+
 
   const handleAiToggle = () => {
     setAiExpanded(true);
@@ -31,7 +25,7 @@ export function ModularInfoSidebar({ selectedSatellite }: ModularInfoSidebarProp
   };
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 w-72 bg-[rgba(30,30,30,0.3)] backdrop-blur-lg border-l border-white/10 text-white flex flex-col z-50 overflow-hidden">
+    <div className="fixed right-0 top-0 bottom-0 w-72 bg-teal-900/20 backdrop-blur-xl border-l border-teal-400/30 text-white flex flex-col z-50 overflow-hidden">
       {aiExpanded ? (
         <AIChatComponent 
            
@@ -52,7 +46,7 @@ export function ModularInfoSidebar({ selectedSatellite }: ModularInfoSidebarProp
 
           {/* Satellite Info Panel */}
           <div className="flex-1 p-4 flex flex-col min-h-0">
-            <SatelliteInfoPanel selectedSatellite={selectedSatellite} />
+            <SatelliteInfoPanel selectedSatellite={satellite ? { ...satellite, noradId: Number(satellite.noradId) } : null} />
           </div>
         </div>
       )}

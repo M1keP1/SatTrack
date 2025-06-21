@@ -5,6 +5,7 @@ interface SatelliteInfo {
   longitude: number;
   latitude: number;
   altitude: number;
+  velocity: number; 
   satelliteType: string;
   operator: string;
 }
@@ -20,6 +21,7 @@ export function SatelliteInfoPanel({ selectedSatellite }: SatelliteInfoPanelProp
     longitude: 0,
     latitude: 0,
     altitude: 0,
+    velocity: 0, 
     satelliteType: "",
     operator: ""
   };
@@ -68,8 +70,11 @@ export function SatelliteInfoPanel({ selectedSatellite }: SatelliteInfoPanelProp
         <div className="bg-teal-800/20 backdrop-blur-sm rounded-lg p-2 border border-teal-400/20 text-center">
           <div className="text-xs text-teal-300/70 mb-1">Velocity</div>
           <div className="text-sm font-mono text-cyan-400 font-bold">
-            {selectedSatellite ? "7.66 km/s" : "--- km/s"}
+            {selectedSatellite && !isNaN(displayData.velocity)
+              ? `${displayData.velocity.toFixed(2)} km/s`
+              : "--- km/s"}
           </div>
+
         </div>
       </div>
 

@@ -23,13 +23,15 @@ function App() {
         satellites={satellites}
         setSatellites={setSatellites}
         trackedId={trackedId}
+        setTrackedId={setTrackedId}
       />
       <Sidebar
         onSearch={handleSearch}
         satelliteNames={satellites.map((s) => s.name)}
         viewerRef={viewerRef}
       />
-      <ModularInfoSidebar selectedSatellite={null} />
+      <ModularInfoSidebar selectedNoradId={trackedId} />
+
     </div>
   );
 }

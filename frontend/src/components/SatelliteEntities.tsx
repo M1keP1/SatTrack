@@ -5,14 +5,16 @@ import { Color, Cartesian2, Entity as CesiumEntity, Viewer as CesiumViewer } fro
 import toast from "react-hot-toast";
 import { useSatelliteTracker } from "../hooks/useSatelliteTracker";
 import type { SatellitePosition } from "../services/satelliteManager";
+import { ScreenSpaceEventHandler, ScreenSpaceEventType } from "cesium";
 
 type Props = {
   satellites: SatellitePosition[];
   setSatellites: (data: SatellitePosition[]) => void;
   trackedId: string | null;
+  setTrackedId: (id: string | null) => void;
 };
 
-export default function SatelliteEntities({ satellites, setSatellites, trackedId }: Props) {
+export default function SatelliteEntities({ satellites, setSatellites, trackedId,setTrackedId }: Props) {
   const entityRefs = useRef<Record<string, CesiumEntity>>({});
 
   // Handle TLE polling and updates
@@ -31,12 +33,28 @@ export default function SatelliteEntities({ satellites, setSatellites, trackedId
     }
   }, [trackedId]);
 
+  useEffect(() => {
+    const viewer = (window as any).cesiumViewer as CesiumViewer | undefined;
+    if (!viewer) return;
+
+    const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
+    
+    handler.setInputAction((movement: any) => {
+      const picked = viewer.scene.pick(movement.position);
+      if (picked?.id?.id) {
+        setTrackedId(picked.id.id); 
+      }
+    }, ScreenSpaceEventType.LEFT_CLICK);
+
+    return () => handler.destroy();
+  }, []);
   return (
     <>
       {satellites.map((sat) =>
         sat.position ? (
           <Entity
             key={sat.id}
+            id={sat.id}
             name={sat.name}
             position={sat.position}
             ref={(e) => {
