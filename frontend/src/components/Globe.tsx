@@ -12,9 +12,10 @@ type GlobeProps = {
   setSatellites: (data: SatellitePosition[]) => void;
   trackedId: string | null;
   setTrackedId: (id: string | null) => void;
+  setCurrentTLE: (tle: { line1: string; line2: string } | null) => void;
 };
 
-const Globe: React.FC<GlobeProps> = ({ viewerRef, satellites, setSatellites, trackedId,setTrackedId }) => {
+const Globe: React.FC<GlobeProps> = ({ viewerRef, satellites, setSatellites, trackedId, setTrackedId, setCurrentTLE }) => {
 
   return (
     <Viewer
@@ -41,6 +42,7 @@ const Globe: React.FC<GlobeProps> = ({ viewerRef, satellites, setSatellites, tra
       setSatellites={setSatellites}
       trackedId={trackedId} 
       setTrackedId={setTrackedId}
+      setCurrentTLE={setCurrentTLE}
     />
 
     </Viewer>

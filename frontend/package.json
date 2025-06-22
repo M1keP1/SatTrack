@@ -22,7 +22,8 @@
     "react-icons": "^5.5.0",
     "resium": "^1.19.0-beta.1",
     "satellite.js": "^6.0.0",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "tz-lookup": "^6.1.25"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

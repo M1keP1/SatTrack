@@ -8,11 +8,19 @@ import { useSatelliteDetails } from "@/hooks/useSatelliteDetails";
 interface ModularInfoSidebarProps {
   selectedNoradId: string | null;
   onExpandedChange?: (expanded: boolean) => void;
+  tle?: { line1: string; line2: string } | null;
+  groundStation?: { lat: number; lon: number; name: string } | null;
+  isGroundStationEnabled?: boolean;
 }
 
-export function ModularInfoSidebar({ selectedNoradId }: ModularInfoSidebarProps) {
+export function ModularInfoSidebar({
+  selectedNoradId,
+  tle,
+  groundStation,
+  isGroundStationEnabled,
+}: ModularInfoSidebarProps) {
   const [aiExpanded, setAiExpanded] = useState(false);
-console.log("ModularInfoSidebar received:", selectedNoradId);
+
 const satellite = useSatelliteDetails(selectedNoradId);
 
 
@@ -46,7 +54,16 @@ const satellite = useSatelliteDetails(selectedNoradId);
 
           {/* Satellite Info Panel */}
           <div className="flex-1 p-4 flex flex-col min-h-0">
-            <SatelliteInfoPanel selectedSatellite={satellite ? { ...satellite, noradId: Number(satellite.noradId) } : null} />
+            <SatelliteInfoPanel
+              selectedSatellite={satellite ? { ...satellite, noradId: Number(satellite.noradId) } : null}
+              tle={tle ?? null}
+              groundStation={
+                groundStation
+                  ? { lat: groundStation.lat, lon: groundStation.lon, alt: 0 }
+                  : null
+              }
+              isGroundStationEnabled={isGroundStationEnabled ?? false} 
+            />
           </div>
         </div>
       )}

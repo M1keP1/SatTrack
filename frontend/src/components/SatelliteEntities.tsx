@@ -6,15 +6,17 @@ import toast from "react-hot-toast";
 import { useSatelliteTracker } from "../hooks/useSatelliteTracker";
 import type { SatellitePosition } from "../services/satelliteManager";
 import { ScreenSpaceEventHandler, ScreenSpaceEventType } from "cesium";
+import { getTLEByNorad } from "@/services/tleService";
 
 type Props = {
   satellites: SatellitePosition[];
   setSatellites: (data: SatellitePosition[]) => void;
   trackedId: string | null;
   setTrackedId: (id: string | null) => void;
+  setCurrentTLE?: (tle: { line1: string; line2: string } | null) => void;
 };
 
-export default function SatelliteEntities({ satellites, setSatellites, trackedId,setTrackedId }: Props) {
+export default function SatelliteEntities({ satellites, setSatellites, trackedId, setTrackedId, setCurrentTLE }: Props) {
   const entityRefs = useRef<Record<string, CesiumEntity>>({});
 
   // Handle TLE polling and updates
@@ -38,11 +40,28 @@ export default function SatelliteEntities({ satellites, setSatellites, trackedId
     if (!viewer) return;
 
     const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
-    
-    handler.setInputAction((movement: any) => {
+
+    handler.setInputAction(async (movement: any) => {
       const picked = viewer.scene.pick(movement.position);
-      if (picked?.id?.id) {
-        setTrackedId(picked.id.id); 
+      const pickedId = picked?.id?.id;
+      if (!pickedId) return;
+
+      setTrackedId(pickedId); // still needed to follow the satellite
+      toast.success(`🎯 Tracking Satellite: ${pickedId}`);
+
+      try {
+        const cleanedId = pickedId.replace(/[Uu]$/, "").trim();
+        const tle = await getTLEByNorad(cleanedId);
+
+        if (tle && setCurrentTLE) {
+          setCurrentTLE(tle);
+          console.log("🛰️ Fetched & set TLE from server for:", pickedId);
+        } else {
+          console.warn("❌ No TLE found for:", pickedId);
+          setCurrentTLE?.(null);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching TLE:", err);
       }
     }, ScreenSpaceEventType.LEFT_CLICK);
 

@@ -1,3 +1,9 @@
+import { usePassPrediction } from "@/hooks/usePassPrediction";
+import { type GroundTrackResult } from "@/hooks/usePassPrediction";
+import { useEffect } from "react";
+
+
+
 
 interface SatelliteInfo {
   noradId: number;
@@ -10,11 +16,20 @@ interface SatelliteInfo {
   operator: string;
 }
 
+
 interface SatelliteInfoPanelProps {
   selectedSatellite: SatelliteInfo | null;
+  tle: { line1: string; line2: string } | null;
+  groundStation: { lat: number; lon: number; alt: number } | null;
+  isGroundStationEnabled: boolean;
 }
 
-export function SatelliteInfoPanel({ selectedSatellite }: SatelliteInfoPanelProps) {
+export function SatelliteInfoPanel({ 
+  selectedSatellite,
+  tle,
+  groundStation,
+  isGroundStationEnabled,
+ }: SatelliteInfoPanelProps) {
   const displayData = selectedSatellite || {
     noradId: 0,
     name: "",
@@ -26,7 +41,19 @@ export function SatelliteInfoPanel({ selectedSatellite }: SatelliteInfoPanelProp
     operator: ""
   };
 
+  useEffect(() => {
+    console.log("🔍 [SatelliteInfoPanel] Props changed:", {
+      tle,
+      groundStation,
+      isGroundStationEnabled,
+    });
+  }, [tle, groundStation, isGroundStationEnabled]);
+
+
+  const passData: GroundTrackResult | null = usePassPrediction(tle, groundStation, isGroundStationEnabled);
+  console.log("📡 usePassPrediction returned:", passData);
   return (
+    
     <div className="flex-1 flex flex-col space-y-3 min-h-0">
       {/* Coordinates Section */}
       <div className="grid grid-cols-2 gap-2 flex-shrink-0">
@@ -112,26 +139,28 @@ export function SatelliteInfoPanel({ selectedSatellite }: SatelliteInfoPanelProp
         <div className="grid grid-cols-3 gap-1 mb-3 text-xs">
           <div className="text-center bg-teal-900/30 rounded p-1 border border-teal-400/20">
             <div className="text-teal-300/80 mb-0.5">Azimuth</div>
-            <div className="text-teal-400 font-mono">127°</div>
+            <div className="text-teal-400 font-mono">
+              {passData ? `${passData.azimuth.toFixed(0)}°` : "--°"}
+            </div>
           </div>
           <div className="text-center bg-teal-900/30 rounded p-1 border border-teal-400/20">
             <div className="text-teal-300/80 mb-0.5">Elevation</div>
-            <div className="text-teal-400 font-mono">45°</div>
+            {passData ? `${passData.elevation.toFixed(0)}°` : "--°"}
           </div>
           <div className="text-center bg-teal-900/30 rounded p-1 border border-teal-400/20">
             <div className="text-teal-300/80 mb-0.5">Range</div>
-            <div className="text-teal-400 font-mono">850km</div>
+            {passData ? `${Math.round(passData.range)} km` : "-- km"}
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div className="text-center bg-teal-900/30 rounded p-1.5 border border-teal-400/20">
             <div className="text-xs text-teal-300/80 mb-0.5">Next Pass</div>
-            <div className="text-emerald-400 font-mono text-xs">14:23 UTC</div>
+            {passData?.nextPassStartLocal ?? "--:--"}
           </div>
           <div className="text-center bg-teal-900/30 rounded p-1.5 border border-teal-400/20">
             <div className="text-xs text-teal-300/80 mb-0.5">Duration</div>
-            <div className="text-white font-mono text-xs">6m 42s</div>
+            {passData?.nextPassDuration ? `${Math.floor(passData.nextPassDuration / 60)}m ${Math.round(passData.nextPassDuration % 60)}s` : "--"}
           </div>
         </div>
 
