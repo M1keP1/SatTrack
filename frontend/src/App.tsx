@@ -7,6 +7,8 @@ import { useSatelliteSearch } from "./hooks/useSatelliteSearch";
 import { useClickOutside } from "./hooks/useClickOutside";
 import type { SatellitePosition } from "./services/satelliteManager";
 import { ModularInfoSidebar } from "./components/RightSideBar/modular-info-sidebar";
+import { SkyglowPanel } from "@/components/RightSideBar/SkyglowPanel";
+import { CloudPanel } from "@/components/RightSideBar/CloudPanel";
 
 function App() {
   const viewerRef = useRef<Viewer | null>(null);
@@ -20,6 +22,8 @@ function App() {
   const [currentTLE, setCurrentTLE] = useState<{ line1: string; line2: string } | null>(null);
   const isGroundStationEnabled = groundStation !== null;
   const handleSearch = useSatelliteSearch(viewerRef, satellites, setTrackedId, setCurrentTLE);
+  const [showSkyglow, setShowSkyglow] = useState(false);
+  const [showCloud, setShowCloud] = useState(false);
 
   useClickOutside(viewerRef, trackedId, setTrackedId);
 
@@ -48,7 +52,13 @@ function App() {
         selectedNoradId={trackedId}
         tle={currentTLE}
         groundStation={groundStation}
-        isGroundStationEnabled={isGroundStationEnabled} />
+        isGroundStationEnabled={isGroundStationEnabled} 
+        onOpenSkyglow={() => setShowSkyglow(true)}
+        onOpenCloud={() => setShowCloud(true)}
+      />
+
+        <SkyglowPanel isOpen={showSkyglow} onClose={() => setShowSkyglow(false)} />
+        <CloudPanel isOpen={showCloud} onClose={() => setShowCloud(false)} />
     </div>
   );
 }

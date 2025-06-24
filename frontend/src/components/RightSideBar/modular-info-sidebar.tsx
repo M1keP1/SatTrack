@@ -11,6 +11,8 @@ interface ModularInfoSidebarProps {
   tle?: { line1: string; line2: string } | null;
   groundStation?: { lat: number; lon: number; name: string } | null;
   isGroundStationEnabled?: boolean;
+  onOpenSkyglow?: () => void;
+  onOpenCloud?: () => void;
 }
 
 export function ModularInfoSidebar({
@@ -18,6 +20,8 @@ export function ModularInfoSidebar({
   tle,
   groundStation,
   isGroundStationEnabled,
+  onOpenSkyglow,
+  onOpenCloud,
 }: ModularInfoSidebarProps) {
   const [aiExpanded, setAiExpanded] = useState(false);
 
@@ -45,26 +49,28 @@ const satellite = useSatelliteDetails(selectedNoradId);
           <div className="p-4 border-b border-teal-400/20 flex-shrink-0">
             <Button
               onClick={handleAiToggle}
-              className="w-full bg-teal-600/30 backdrop-blur-sm border border-teal-400/30 rounded-lg p-3 text-sm text-white hover:bg-teal-600/40 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-teal-400/20 flex items-center justify-center gap-2"
+              className="w-full !bg-teal-600/30 backdrop-blur-sm border border-teal-400/30 rounded-lg p-3 text-sm text-white hover:bg-teal-600/40 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-teal-400/20 flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-4 h-4" />
-              Ask AI Assistant
+              Ask AI Agent
             </Button>
           </div>
 
-          {/* Satellite Info Panel */}
-          <div className="flex-1 p-4 flex flex-col min-h-0">
+          {/* Satellite Info Panel (with padding & scroll) */}
+          <div className="flex-1 p-4 overflow-y-auto">
             <SatelliteInfoPanel
               selectedSatellite={satellite ? { ...satellite, noradId: Number(satellite.noradId) } : null}
               tle={tle ?? null}
-              groundStation={
-                groundStation
-                  ? { lat: groundStation.lat, lon: groundStation.lon, alt: 0 }
-                  : null
-              }
-              isGroundStationEnabled={isGroundStationEnabled ?? false} 
+              groundStation={groundStation
+                ? { lat: groundStation.lat, lon: groundStation.lon, alt: 0 }
+                : null}
+              isGroundStationEnabled={isGroundStationEnabled ?? false}
+              onOpenSkyglow={onOpenSkyglow ?? (() => {})}
+              onOpenCloud={onOpenCloud ?? (() => {})}
             />
           </div>
+
+
         </div>
       )}
     </div>
