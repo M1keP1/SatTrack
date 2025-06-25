@@ -1,8 +1,6 @@
 import { usePassPrediction } from "@/hooks/usePassPrediction";
 import { type GroundTrackResult } from "@/hooks/usePassPrediction";
-import { useEffect } from "react";
-
-
+import { useEffect, useState } from "react";
 
 interface SatelliteInfo {
   noradId: number;
@@ -14,7 +12,6 @@ interface SatelliteInfo {
   satelliteType: string;
   operator: string;
 }
-
 
 interface SatelliteInfoPanelProps {
   selectedSatellite: SatelliteInfo | null;
@@ -51,8 +48,10 @@ export function SatelliteInfoPanel({
     });
   }, [tle, groundStation, isGroundStationEnabled]);
 
-
   const passData: GroundTrackResult | null = usePassPrediction(tle, groundStation, isGroundStationEnabled);
+  const [] = useState(false);
+  const [] = useState(false);
+
   console.log("📡 usePassPrediction returned:", passData);
   return (
     <>
@@ -213,6 +212,7 @@ export function SatelliteInfoPanel({
         </div>
         <div className="bg-teal-800/20 backdrop-blur-sm rounded-lg p-3 border border-teal-400/20 text-center mt-3 space-y-2">
           <div className="flex justify-center gap-3">
+            {/* Support */}
             <a
               href="https://buymeacoffee.com/sattrack"
               target="_blank"
@@ -222,18 +222,46 @@ export function SatelliteInfoPanel({
             >
               💙
             </a>
+
+            {/* Contact */}
             <a
-              href="mailto:sattrack.contact@gmail.com?subject=SatTrack%20Collab%20or%20Updates"
+              href="#"
+              onClick={() => alert("Contact functionality coming soon!")}
               className="text-2xl transition-transform hover:scale-110"
               title="Contact / Get Updates"
             >
               📬
             </a>
+
+            <a
+              href="/RoadMap.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                alert("🛠️ Markdown viewer coming soon! Opening raw text for now.");
+              }}
+              className="text-2xl transition-transform hover:scale-110"
+              title="Roadmap"
+            >
+              🗺️
+            </a>
+
+            <a
+              href="/Credits.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                alert("📖 Markdown viewer coming soon! Opening raw text for now.");
+              }}
+              className="text-2xl transition-transform hover:scale-110"
+              title="Credits / About"
+            >
+              🙌
+            </a>
+
+
           </div>
         </div>
-
-
-
       </div>
     </>
   );
