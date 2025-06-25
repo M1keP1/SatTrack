@@ -1,12 +1,13 @@
 // components/SatelliteEntities.tsx
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Entity } from "resium";
-import { Color, Cartesian2, Entity as CesiumEntity, Viewer as CesiumViewer } from "cesium";
+import { Color, Entity as CesiumEntity, Viewer as CesiumViewer, Cartesian2 } from "cesium";
 import toast from "react-hot-toast";
 import { useSatelliteTracker } from "../hooks/useSatelliteTracker";
 import type { SatellitePosition } from "../services/satelliteManager";
-import { ScreenSpaceEventHandler, ScreenSpaceEventType } from "cesium";
+import { ScreenSpaceEventHandler, ScreenSpaceEventType, NearFarScalar, HorizontalOrigin, VerticalOrigin, LabelStyle } from "cesium";
 import { getTLEByNorad } from "@/services/tleService";
+
 
 type Props = {
   satellites: SatellitePosition[];
@@ -18,6 +19,7 @@ type Props = {
 
 export default function SatelliteEntities({ satellites, setSatellites, trackedId, setTrackedId, setCurrentTLE }: Props) {
   const entityRefs = useRef<Record<string, CesiumEntity>>({});
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   // Handle TLE polling and updates
   useSatelliteTracker(setSatellites);
@@ -35,6 +37,22 @@ export default function SatelliteEntities({ satellites, setSatellites, trackedId
     }
   }, [trackedId]);
 
+  // Handle mouse hover events
+  useEffect(() => {
+      const viewer = (window as any).cesiumViewer as CesiumViewer | undefined;
+      if (!viewer) return;
+
+      const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
+
+      handler.setInputAction((movement: any) => {
+        const picked = viewer.scene.pick(movement.endPosition);
+        const id = picked?.id?.id ?? null;
+        setHoveredId(id);
+      }, ScreenSpaceEventType.MOUSE_MOVE);
+
+      return () => handler.destroy();
+    }, []);
+
   useEffect(() => {
     const viewer = (window as any).cesiumViewer as CesiumViewer | undefined;
     if (!viewer) return;
@@ -47,7 +65,7 @@ export default function SatelliteEntities({ satellites, setSatellites, trackedId
       if (!pickedId) return;
 
       setTrackedId(pickedId); // still needed to follow the satellite
-      toast.success(`🎯 Tracking Satellite: ${pickedId}`);
+      toast.success(`ℹ️ Right Click to exit Follow Mode`);
 
       try {
         const cleanedId = pickedId.replace(/[Uu]$/, "").trim();
@@ -67,6 +85,7 @@ export default function SatelliteEntities({ satellites, setSatellites, trackedId
 
     return () => handler.destroy();
   }, []);
+
   return (
     <>
       {satellites.map((sat) =>
@@ -81,14 +100,50 @@ export default function SatelliteEntities({ satellites, setSatellites, trackedId
                 entityRefs.current[sat.id] = e.cesiumElement;
               }
             }}
-            point={{ pixelSize: 10, color: Color.WHITE }}
-            label={{
-              text: sat.name,
-              font: "12pt sans-serif",
-              fillColor: Color.CYAN,
-              showBackground: true,
-              pixelOffset: new Cartesian2(10, -20),
+            point={{
+              pixelSize:
+                trackedId === sat.id ? 22 :
+                hoveredId === sat.id ? 18 : 12, // 🔥 Bigger sizes for impact
+              color:
+                trackedId === sat.id
+                  ? Color.fromCssColorString("#34d399") // Earth green (tracked)
+                  : hoveredId === sat.id
+                  ? Color.fromCssColorString("#bbf7d0") // Light green (hovered)
+                  : Color.WHITE,
+              outlineColor: Color.BLACK.withAlpha(0.5),
+              outlineWidth: 2,
+              scaleByDistance: new NearFarScalar(150, 1.3, 15000000, 0.5),
             }}
+
+
+
+
+            label={
+              hoveredId === sat.id || trackedId === sat.id
+                ? {
+                    text: sat.name,                    
+                    font:
+                      trackedId === sat.id
+                        ? "700 16px monospace"
+                        : "400 13px monospace",
+                    fillColor: Color.WHITE,
+                    outlineColor: Color.BLACK.withAlpha(0.6),
+                    outlineWidth: 2,
+                    showBackground: true,
+                    backgroundColor: Color.BLACK.withAlpha(0.5), 
+                    backgroundPadding: new Cartesian2(8, 4),
+                    pixelOffset: new Cartesian2(24, 0), 
+                    horizontalOrigin: HorizontalOrigin.LEFT,
+                    verticalOrigin: VerticalOrigin.CENTER,
+                    style: LabelStyle.FILL_AND_OUTLINE,
+                  }
+                : undefined
+            }
+
+
+
+
+
             description={`<p>${sat.name}</p>`}
           />
         ) : null

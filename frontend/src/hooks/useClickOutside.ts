@@ -1,6 +1,6 @@
 // src/hooks/useClickOutside.ts
 import { useEffect } from "react";
-import { Cartesian3 } from "cesium";
+import { Cartesian2, Cartesian3 } from "cesium";
 import type { Viewer } from "cesium";
 
 export function useClickOutside(
@@ -9,39 +9,35 @@ export function useClickOutside(
   setTrackedId: (id: string | null) => void
 ) {
   useEffect(() => {
-    const resetCameraView = () => {
-      if (!viewerRef.current) return;
-      viewerRef.current.camera.flyTo({
-        destination: Cartesian3.fromDegrees(0, 0, 20000000),
-        duration: 2,
-      });
-      console.log("🔄 Resetting camera to default view.");
-    };
+    const handleRightClick = (e: MouseEvent) => {
+      if (!viewerRef.current || !trackedId) return;
+      const viewer = viewerRef.current;
 
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
+      const canvas = viewer.scene.canvas;
+      const rect = canvas.getBoundingClientRect();
 
-      if (
-        target.closest(".sidebar-container") ||
-        target.closest(".suggestions-list") ||
-        target.closest(".search-input")
-      )
-        return;
+      const mousePosition = new Cartesian2(
+        e.clientX - rect.left,
+        e.clientY - rect.top
+      );
 
-      if (trackedId) {
-        console.log("👆 Clicked outside, exiting follow mode.");
+      const picked = viewer.scene.pick(mousePosition);
+
+      if (!picked && viewer.trackedEntity) {
+        viewer.trackedEntity = undefined;
         setTrackedId(null);
-        resetCameraView();
+        viewer.camera.flyTo({
+          destination: Cartesian3.fromDegrees(0, 0, 20000000),
+          duration: 2,
+        });
+        console.log("🧭 Exited follow mode and reset view (right-click)");
       }
     };
 
-    const timeout = setTimeout(() => {
-      window.addEventListener("click", handleClick);
-    }, 100);
-
+    // Use right-click (contextmenu)
+    window.addEventListener("contextmenu", handleRightClick);
     return () => {
-      clearTimeout(timeout);
-      window.removeEventListener("click", handleClick);
+      window.removeEventListener("contextmenu", handleRightClick);
     };
-  }, [trackedId]);
+  }, [viewerRef, trackedId, setTrackedId]);
 }
