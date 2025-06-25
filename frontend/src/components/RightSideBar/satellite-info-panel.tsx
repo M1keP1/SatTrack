@@ -210,13 +210,13 @@ export function SatelliteInfoPanel({
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={onOpenSkyglow}
-            className="!bg-teal-900/40 backdrop-blur-sm border border-teal-400/30 rounded-lg p-2 text-xs text-white hover:bg-teal-800/40 transition-colors"
+            className="font-mono !bg-teal-900/40 backdrop-blur-sm border border-teal-400/30 rounded-lg p-2 text-xs text-white hover:bg-teal-800/40 transition-colors"
           >
             Skyglow
           </button>
           <button
             onClick={onOpenCloud}
-            className="!bg-teal-900/40 backdrop-blur-sm border border-teal-400/30 rounded-lg p-2 text-xs text-white hover:bg-teal-800/40 transition-colors"
+            className="font-mono !bg-teal-900/40 backdrop-blur-sm border border-teal-400/30 rounded-lg p-2 text-xs text-white hover:bg-teal-800/40 transition-colors"
           >
             Cloud
           </button>
@@ -224,7 +224,7 @@ export function SatelliteInfoPanel({
       </div>
 
       {/* Footer with Links */}
-      <div className="bg-teal-800/20 backdrop-blur-sm rounded-lg p-3 border border-teal-400/20 text-center mt-3 space-y-2">
+      <div className="font-mono bg-teal-800/20 backdrop-blur-sm rounded-lg p-3 border border-teal-400/20 text-center mt-3 space-y-2">
         <div className="flex justify-center gap-3">
           <a
             href="https://buymeacoffee.com/sattrack"

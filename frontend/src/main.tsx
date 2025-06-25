@@ -1,17 +1,15 @@
-import './index.css'; 
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import './index.css';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
-import { Toaster } from "react-hot-toast";
+import CustomToaster from './components/CustomToaster.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <>
       <App />
-      <Toaster position="bottom-right" />
+      <CustomToaster />
     </>
   </StrictMode>
 );
-
