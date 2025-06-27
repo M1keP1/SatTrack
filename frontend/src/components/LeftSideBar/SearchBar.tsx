@@ -1,61 +1,53 @@
 import { useState, useEffect } from "react";
-import "./SearchBar.css";
-import toast from "react-hot-toast";
+import { Search } from "lucide-react";
+import Fuse from "fuse.js";
+import { motion, AnimatePresence } from "framer-motion";
 
 type SearchBarProps = {
   onSearch: (query: string) => void;
   suggestions: string[];
+  onSubmitDone?: () => void;
 };
 
-export default function SearchBar({ onSearch, suggestions }: SearchBarProps) {
+export default function SearchBar({ onSearch, suggestions, onSubmitDone }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [matched, setMatched] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [invalid, setInvalid] = useState(false);
-  const [manualInput, setManualInput] = useState(true); // Track if user typed or tabbed
+  const [manualInput, setManualInput] = useState(true);
 
   useEffect(() => {
-    if (query.startsWith("/")) {
-      const term = query.slice(1).toLowerCase();
-      const filtered = suggestions.filter((s) =>
-        s.toLowerCase().includes(term)
-      );
-      setMatched(filtered);
-      setSelectedIndex(0);
+    const term = query.trim().toLowerCase();
+    if (term !== "" && !query.startsWith("/")) {
+      const fuse = new Fuse(suggestions, {
+        includeScore: true,
+        threshold: 0.4,
+      });
+
+      const results = fuse.search(term);
+      const sorted = results
+        .sort((a, b) => a.score! - b.score!)
+        .map((r) => r.item);
+
+      setMatched(sorted);
     } else {
       setMatched([]);
-      setSelectedIndex(0);
     }
+
+    setSelectedIndex(0);
   }, [query, suggestions]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     const trimmed = query.trim();
-    console.log("🔍 [Submit] Query entered:", trimmed);
+    if (!trimmed) return;
 
-    if (trimmed.startsWith("/")) {
-      const name = trimmed.slice(1).trim();
-      const exact = suggestions.find(
-        (s) => s.toLowerCase() === name.toLowerCase()
-      );
+    const finalQuery =
+      !manualInput && matched.length > 0
+        ? matched[selectedIndex]
+        : trimmed;
 
-      if (exact) {
-        const formattedQuery = `/${exact}`;
-        console.log("✅ [Submit] Found exact match:", exact);
-        onSearch(formattedQuery);
-        toast.success(`🛰️ Tracking ${exact}`);
-      } else {
-        console.warn("❌ [Submit] No satellite match found for:", name);
-        setInvalid(true);
-        toast.error("Satellite not found");
-        setTimeout(() => setInvalid(false), 700);
-      }
-    } else {
-      console.log("🌍 [Submit] Falling back to geocode:", trimmed);
-      onSearch(trimmed);
-    }
-
+    onSearch(finalQuery);
+    onSubmitDone?.();
     setQuery("");
     setMatched([]);
     setSelectedIndex(0);
@@ -90,45 +82,86 @@ export default function SearchBar({ onSearch, suggestions }: SearchBarProps) {
   };
 
   const handleSuggestionClick = (satName: string) => {
-    const fullQuery = `/${satName}`;
-    console.log("🖱️ [Click] Suggestion clicked:", satName);
+    onSearch(satName);
+    onSubmitDone?.();
     setQuery("");
     setMatched([]);
     setSelectedIndex(0);
-    onSearch(fullQuery);
-    toast.success(`🛰️ Tracking ${satName}`);
+  };
+
+  const highlightMatch = (text: string) => {
+    const input = query.trim().toLowerCase();
+    if (!input) return text;
+
+    const index = text.toLowerCase().indexOf(input);
+    if (index === -1) return text;
+
+    const before = text.slice(0, index);
+    const match = text.slice(index, index + input.length);
+    const after = text.slice(index + input.length);
+
+    return (
+      <>
+        {before}
+        <span className="text-teal-300 font-bold">{match}</span>
+        {after}
+      </>
+    );
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        className={`search-input ${invalid ? "shake-error" : ""}`}
-        type="text"
-        placeholder="Search /ISS or Darmstadt"
-        value={
-          matched.length > 0 && !manualInput
-            ? `/${matched[selectedIndex]}`
-            : query
-        }
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setManualInput(true);
-        }}
-        onKeyDown={handleKeyDown}
-      />
-      {matched.length > 0 && (
-        <ul className="suggestions-list">
-          {matched.map((s, i) => (
-            <li
-              key={s}
-              className={i === selectedIndex ? "selected" : ""}
-              onClick={() => handleSuggestionClick(s)}
+    <form onSubmit={handleSubmit} className="relative z-10 w-full">
+      <div className="w-full transition-all duration-300 ease-in-out">
+        {/* Search input */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-4 w-4" />
+          <input
+            type="text"
+            placeholder="Search for satellites..."
+            value={
+              matched.length > 0 && !manualInput
+                ? matched[selectedIndex]
+                : query
+            }
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setManualInput(true);
+            }}
+            onKeyDown={handleKeyDown}
+            className="w-full pl-9 pr-3 py-1.5 rounded-lg text-sm bg-white/10 text-white placeholder-white/70 outline-none border border-white/10 focus:border-teal-300 transition-all duration-200"
+          />
+        </div>
+
+        {/* Animated Suggestions Dropdown */}
+        <AnimatePresence>
+          {matched.length > 0 && query.trim() !== "" && !query.startsWith("/") && (
+            <motion.div
+              key="suggestions"
+              initial={{ opacity: 0, scaleY: 0.8 }}
+              animate={{ opacity: 1, scaleY: 1 }}
+              exit={{ opacity: 0, scaleY: 0.8 }}
+              transition={{ duration: 0.2 }}
+              className="mt-2 origin-top"
             >
-              {s}
-            </li>
-          ))}
-        </ul>
-      )}
+              <ul className="bg-cyan-900/80 backdrop-blur-md text-white rounded-lg shadow-md border border-white/10 text-sm max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20">
+                {matched.map((s, i) => (
+                  <li
+                    key={s}
+                    className={`px-3 py-1.5 cursor-pointer transition-colors ${
+                      i === selectedIndex
+                        ? "bg-teal-600/30 font-semibold"
+                        : "hover:bg-white/10"
+                    }`}
+                    onClick={() => handleSuggestionClick(s)}
+                  >
+                    {highlightMatch(s)}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </form>
   );
 }

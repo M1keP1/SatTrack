@@ -12,11 +12,22 @@ interface GroundStationPanelProps {
   viewerRef: RefObject<Viewer | null>;
   onGroundStationChange?: (location: { lat: number; lon: number; name: string } | null) => void;
   visibleFromGroundStation?: number;
+  groundStationActive: boolean;
+  setGroundStationActive: (active: boolean) => void;
+  userLocation: { lat: number; lon: number; name: string } | null;
+  setUserLocation: (loc: { lat: number; lon: number; name: string } | null) => void;
 }
 
-export function GroundStationPanel({ viewerRef, onGroundStationChange }: GroundStationPanelProps) {
-  const [groundStationActive, setGroundStationActive] = useState(false);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number; name: string } | null>(null);
+export function GroundStationPanel({
+  viewerRef,
+  onGroundStationChange,
+  groundStationActive,
+  setGroundStationActive,
+  userLocation,
+  setUserLocation,
+}: GroundStationPanelProps)
+ {
+
   const [locationQuery, setLocationQuery] = useState("");
 
 
@@ -24,6 +35,7 @@ export function GroundStationPanel({ viewerRef, onGroundStationChange }: GroundS
     const fallback = { lat: 49.8728, lon: 8.6512, name: "Darmstadt" };
     setUserLocation(fallback);
     setGroundStationActive(true);
+
     onGroundStationChange?.(fallback);
     if (viewerRef.current) {
       geocodeAndFlyTo(viewerRef.current, fallback.name, 10);
@@ -118,6 +130,7 @@ export function GroundStationPanel({ viewerRef, onGroundStationChange }: GroundS
           size="icon"
           className={cn(
             "h-7 w-16 px-0 !text-xs !bg-teal-500/20 !text-teal-300 !hover:bg-teal-500/40 border border-teal-400/40",
+            !groundStationActive && "animate-pulse",
             groundStationActive && "!bg-green-500/20 !text-green-400 !border-green-400"
           )}
           onClick={handleSetLocationClick}

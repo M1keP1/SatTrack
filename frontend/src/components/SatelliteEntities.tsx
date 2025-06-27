@@ -103,7 +103,7 @@ export default function SatelliteEntities({ satellites, setSatellites, trackedId
             point={{
               pixelSize:
                 trackedId === sat.id ? 22 :
-                hoveredId === sat.id ? 18 : 12, // 🔥 Bigger sizes for impact
+                hoveredId === sat.id ? 18 : 12, // Bigger sizes for impact
               color:
                 trackedId === sat.id
                   ? Color.fromCssColorString("#34d399") // Earth green (tracked)

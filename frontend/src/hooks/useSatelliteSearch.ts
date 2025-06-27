@@ -2,6 +2,7 @@ import type { Viewer } from "cesium";
 import type { SatellitePosition } from "../services/satelliteManager";
 import { geocodeAndFlyTo } from "../services/geocodeAndFlyTo";
 import { getTLEByNorad } from "../services/tleService";
+import toast from "react-hot-toast";
 
 export function useSatelliteSearch(
   viewerRef: React.RefObject<Viewer | null>,
@@ -11,49 +12,53 @@ export function useSatelliteSearch(
 ) {
   return async function handleSearch(query: string) {
     if (!viewerRef.current) {
-      console.warn("❌ Viewer not ready.");
+      toast.error("❌ Viewer not ready.");
       return;
     }
 
+    
     const trimmed = query.trim();
-    console.log("🔍 Search query received:", trimmed);
+    if (!trimmed) return;
 
-    // Satellite search with prefix "/"
+    // ✅ If input starts with "/", treat as NORAD ID or exact match
     if (trimmed.startsWith("/")) {
-      const satQuery = trimmed.slice(1).replace(/[Uu]$/, "").trim();
-      console.log("🔎 Looking for satellite:", satQuery);
+      const idQuery = trimmed.slice(1).replace(/[Uu]$/, "").trim();
 
-      const sat = satellites.find(
-        (s) => s.name.toLowerCase() === satQuery.toLowerCase()
+      const match = satellites.find(
+        (s) => s.id === idQuery || s.name.toLowerCase() === idQuery.toLowerCase()
       );
 
-      if (sat) {
-        console.log("🎯 Match found:", sat.name, sat.id);
-        if (sat.position) {
-          setTrackedId(sat.id);
-          const cleanId = sat.id.replace(/[Uu]$/, "");
-          const tle = await getTLEByNorad(cleanId);
-          if (tle) {
-            setCurrentTLE(tle);
-            console.log("🛰️ TLE set for:", sat.id);
-          } else {
-            console.warn("❌ No TLE found for:", sat.id);
-            setCurrentTLE(null);
-          }
-
+      if (match && match.position) {
+        setTrackedId(match.id);
+        const tle = await getTLEByNorad(match.id);
+        if (tle) {
+          setCurrentTLE(tle);
+          toast.success(`🛰️ Tracking ${match.name}`);
         } else {
-          console.warn("⚠️ Satellite found but no position available.");
+          setCurrentTLE(null);
+          toast.error("❌ No TLE found for this satellite.");
         }
-      } else {
-        console.warn("❌ No satellite match found.");
-        setCurrentTLE(null);
+        return;
       }
 
+      toast.error("❌ No satellite with this NORAD ID or name.");
       return;
     }
 
-    // Geolocation fallback
-    console.log("🌍 Attempting geocode for:", trimmed);
+    // ✅ Else, treat it as satellite name match
+    const match = satellites.find(
+      (s) => s.name.toLowerCase() === trimmed.toLowerCase()
+    );
+
+    if (match && match.position) {
+      setTrackedId(match.id);
+      setCurrentTLE(match.tle || null);
+      toast.success(`🛰️ Tracking ${match.name}`);
+      return;
+    }
+
+    // 🌍 Fallback to geocode
+    toast("📍 Using location search...");
     geocodeAndFlyTo(viewerRef.current, trimmed, 10);
   };
 }
