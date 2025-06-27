@@ -1,4 +1,3 @@
-import { FaFolder } from "react-icons/fa";
 import type { IconType } from "react-icons";
 
 type CollectionCardProps = {
@@ -14,7 +13,6 @@ export default function CollectionCard({
   count,
   onClick,
   active,
-  icon: Icon = FaFolder, // fallback to folder icon
 }: CollectionCardProps) {
   return (
   <div
@@ -24,7 +22,6 @@ export default function CollectionCard({
     `}
   >
     <div className="flex items-center gap-2">
-      <Icon className="text-yellow-400 text-sm" />
       <span className="capitalize">{name}</span>
     </div>
 
