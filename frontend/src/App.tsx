@@ -58,7 +58,7 @@ function App() {
       />
 
         <SkyglowPanel isOpen={showSkyglow} onClose={() => setShowSkyglow(false)} />
-        <CloudPanel isOpen={showCloud} onClose={() => setShowCloud(false)} />
+        <CloudPanel isOpen={showCloud} onClose={() => setShowCloud(false)} groundStation={groundStation ?? undefined}/>
     </div>
   );
 }

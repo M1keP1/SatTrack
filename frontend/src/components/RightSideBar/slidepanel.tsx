@@ -15,7 +15,6 @@ export function SlidePanel({
   children,
   position = "center",
 }: SlidePanelProps) {
-  // Position shift logic
   const positionClass = {
     "center": "left-1/2 -translate-x-1/2",
     "left-center": "left-1/3 -translate-x-1/2",
@@ -33,14 +32,22 @@ export function SlidePanel({
     >
       <div className="flex justify-between items-center mb-2">
         <h2 className="text-sm font-semibold text-white text-center w-full">{title}</h2>
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-4 text-teal-300 hover:text-white text-sm"
-        >
-          ✕
-        </button>
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-4 text-white text-sm leading-none p-0 m-0 bg-transparent border-none shadow-none outline-none hover:text-teal-300 focus:outline-none"
+            style={{
+              background: "none",
+              border: "none",
+              boxShadow: "none",
+            }}
+          >
+            ✕
+          </button>
+
       </div>
-      <div className="text-sm text-white text-center max-h-72 overflow-y-auto">
+
+      {/* 👇 Non-scrollable content */}
+      <div className="text-sm text-white text-center">
         {children}
       </div>
     </motion.div>
