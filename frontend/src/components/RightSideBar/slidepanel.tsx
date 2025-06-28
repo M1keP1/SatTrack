@@ -27,7 +27,7 @@ export function SlidePanel({
       animate={{ y: isOpen ? 0 : 300, opacity: isOpen ? 1 : 0 }}
       transition={{ type: "spring", stiffness: 260, damping: 25 }}
       className={`fixed bottom-6 transform ${positionClass} w-96 z-50
-        bg-teal-900/30 backdrop-blur-xl border border-teal-400/30
+        bg-teal-900/30 backdrop-blur border border-teal-400/30
         rounded-2xl p-4 shadow-2xl`}
     >
       <div className="flex justify-between items-center mb-2">
