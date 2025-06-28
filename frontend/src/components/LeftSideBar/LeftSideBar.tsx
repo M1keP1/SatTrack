@@ -21,7 +21,7 @@ export default function Sidebar({ onSearch, satelliteNames, viewerRef, ongroundS
     <>
       {/* Static Sidebar */}
       {!collapsed && (
-        <div className="fixed top-0 left-0 w-80 h-full z-50 bg-teal-900/20 backdrop-blur-xl border-r border-teal-400/30 text-teal-400 font-mono flex flex-col shadow-xl overflow-hidden">
+        <div className="fixed top-0 left-0 w-80 h-full z-50 bg-teal-900/10 backdrop-blur border-r border-teal-400/30 text-teal-400 font-mono flex flex-col shadow-xl overflow-hidden">
           {/* Header */}
           <div className="relative flex items-center justify-center px-4 py-3 border-b !border-teal-400/20 !bg-transparent">
             {/* ❌ Close Button — right corner, customizable */}

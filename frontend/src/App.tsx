@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import type { Viewer } from "cesium";
-
+import SplashScreen from "./components/SplashScreen";
 import Globe from "./components/Globe";
 import Sidebar from "./components/LeftSideBar/LeftSideBar";
 import { useSatelliteSearch } from "./hooks/useSatelliteSearch";
@@ -9,6 +9,8 @@ import type { SatellitePosition } from "./services/satelliteManager";
 import { ModularInfoSidebar } from "./components/RightSideBar/modular-info-sidebar";
 import { SkyglowPanel } from "@/components/RightSideBar/SkyglowPanel";
 import { CloudPanel } from "@/components/RightSideBar/CloudPanel";
+import CustomToaster from "./components/CustomToaster";
+
 
 function App() {
   const viewerRef = useRef<Viewer | null>(null);
@@ -24,15 +26,29 @@ function App() {
   const handleSearch = useSatelliteSearch(viewerRef, satellites, setTrackedId, setCurrentTLE);
   const [showSkyglow, setShowSkyglow] = useState(false);
   const [showCloud, setShowCloud] = useState(false);
-
+  const [showSplash, setShowSplash] = useState(true);
   useClickOutside(viewerRef, trackedId, setTrackedId);
 
   useEffect(() => {
-    console.log("📍 Ground Station changed:", groundStation);
-  }, [groundStation]);
+  const timeout = setTimeout(() => {
+    setShowSplash(false);
+  }, 3500); // or hook into Cesium readiness
+
+  return () => clearTimeout(timeout);
+}, []);
 
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
+      {/* Splash Screen with fade out transition */}
+      <div
+        className={`absolute inset-0 z-[9999] transition-opacity duration-1000 ease-in-out ${
+          showSplash ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <SplashScreen />
+      </div>
+
+      {/* Your actual app (always mounted) */}
       <Globe
         viewerRef={viewerRef}
         satellites={satellites}
@@ -48,19 +64,23 @@ function App() {
         viewerRef={viewerRef}
         ongroundStationChange={setGroundStation}
       />
-      <ModularInfoSidebar 
+
+      <ModularInfoSidebar
         selectedNoradId={trackedId}
         tle={currentTLE}
         groundStation={groundStation}
-        isGroundStationEnabled={isGroundStationEnabled} 
+        isGroundStationEnabled={isGroundStationEnabled}
         onOpenSkyglow={() => setShowSkyglow(true)}
         onOpenCloud={() => setShowCloud(true)}
       />
 
-        <SkyglowPanel isOpen={showSkyglow} onClose={() => setShowSkyglow(false)} />
-        <CloudPanel isOpen={showCloud} onClose={() => setShowCloud(false)} groundStation={groundStation ?? undefined}/>
+      <SkyglowPanel isOpen={showSkyglow} onClose={() => setShowSkyglow(false)} />
+      <CloudPanel isOpen={showCloud} onClose={() => setShowCloud(false)} groundStation={groundStation ?? undefined} />
+      {!showSplash && <CustomToaster />}
+
     </div>
-  );
+      );
+      
 }
 
 export default App;
