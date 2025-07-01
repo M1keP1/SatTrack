@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://sattrack.app/sitemap.xml

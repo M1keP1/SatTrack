@@ -34,7 +34,7 @@ export default function SplashScreen() {
             <span className="relative z-10 text-3xl animate-pulse">🛰️</span>
           </div>
           <span>
-            SatTrack <span className="text-base align-super">™</span>/ H<span className="ml-1 animate-pulse">_</span>DA
+            SatTrack<span className="text-base align-super">™</span>
           </span>
         </div>
 
