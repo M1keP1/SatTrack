@@ -35,18 +35,40 @@ export default function Sidebar({ onSearch, satelliteNames, viewerRef, ongroundS
               ✖️
             </button>
 
-            <div className="flex items-center gap-2 text-white font-mono text-3xl select-none -ml-2">
-              {/* Pulsing 🛰️ Emoji */}
-              <span className="animate-pulse text-xl relative top-0.5 ">🛰️</span>
+              <div className="flex items-center gap-2 text-white font-mono text-3xl select-none -ml-2 relative">
+                {/* 🛰️ Tooltip Trigger */}
+                <div className="relative group">
+                  <span className="animate-pulse text-xl relative top-0.5 cursor-help">🛰️</span>
 
-              {/* SatTrack Title */}
-              <span>
-                SatTrack<span className="text-base align-super ml-1">™</span>
-              </span>
-            </div>
+                  {/* Tooltip */}
+                  <div className="absolute top-full left-0 -translate-x-4 mt-2 z-50 hidden group-hover:block bg-black/90 text-white text-xs p-3 rounded-md shadow-lg border border-white/20 w-64">
+                    <p><strong>Credits:</strong></p>
+                    <ul className="list-disc pl-4">
+                      <li>
+                        🌐 <a href="https://cesium.com/ion/" target="_blank" rel="noopener noreferrer" className="underline text-cyan-300">Cesium Ion</a> — Globe rendering
+                      </li>
+                      <li>
+                        📡 <a href="https://celestrak.org" target="_blank" rel="noopener noreferrer" className="underline text-cyan-300">CelesTrak</a> — TLEs & NORAD data
+                      </li>
+                    </ul>
+                    <p className="mt-2 text-amber-200">
+                      ⚠️ This site is new — some data might be inconsistent, and lots of cool features are coming soon!
+                    </p>
+                  </div>
+                </div>
+
+                {/* SatTrack™ Title */}
+                <span>
+                  SatTrack<span className="text-base align-super ml-1">™</span>
+                </span>
+              </div>
 
 
-          </div>
+              </div>
+
+
+
+          
 
           {/* Body */}
           <div className="flex flex-col gap-4 p-4 overflow-y-auto">

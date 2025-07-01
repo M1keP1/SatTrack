@@ -1,6 +1,7 @@
 import { usePassPrediction, type GroundTrackResult } from "@/hooks/usePassPrediction";
 import { useEffect } from "react";
 
+
 // Interface for satellite info props
 interface SatelliteInfo {
   noradId: number;
@@ -21,6 +22,9 @@ interface SatelliteInfoPanelProps {
   isGroundStationEnabled: boolean;
   onOpenSkyglow: () => void;
   onOpenCloud: () => void;
+  onOpenSettings?: () => void;
+  onOpenContact?: () => void;
+  onOpenPromo?: () => void;
 }
 
 // Panel to display selected satellite's live information
@@ -50,6 +54,9 @@ export function SatelliteInfoPanel({
   isGroundStationEnabled,
   onOpenSkyglow,
   onOpenCloud,
+  onOpenSettings,
+  onOpenContact,
+  onOpenPromo,
 }: SatelliteInfoPanelProps) {
   // Use fallback if no satellite is selected
   const displayData = selectedSatellite || {
@@ -62,7 +69,6 @@ export function SatelliteInfoPanel({
     satelliteType: "",
     operator: "",
   };
-
   // Debug logs for prop changes
   useEffect(() => {
     console.log("🔍 [SatelliteInfoPanel] Props changed:", {
@@ -235,34 +241,45 @@ export function SatelliteInfoPanel({
           >
             💙
           </a>
+          
           <a
-            href="#"
-            onClick={() => alert("Contact functionality coming soon!")}
-            className="text-2xl transition-transform hover:scale-110"
+            onClick={() => {
+              onOpenContact?.();
+            }}
+            className="text-2xl transition-transform hover:scale-110 cursor-pointer"
             title="Contact / Get Updates"
           >
             📬
           </a>
+
           <a
-            href="/RoadMap.md"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => alert("🛠️ Markdown viewer coming soon! Opening raw text for now.")}
-            className="text-2xl transition-transform hover:scale-110"
-            title="Roadmap"
+            onClick={onOpenPromo}
+            className="text-xl hover:scale-110 transition-transform cursor-pointer"
+            title="Showcase your satellite"
           >
-            🗺️
+            💡
+          </a>
+
+          <a
+            href="#"
+           
+            rel="noopener noreferrer"
+            onClick={() => alert("Supporters orbit coming soon!")}
+            className="text-2xl transition-transform hover:scale-110"
+            title="Supporters Orbit"
+          >
+            👩‍🚀
           </a>
           <a
-            href="/Credits.md"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => alert("📖 Markdown viewer coming soon! Opening raw text for now.")}
-            className="text-2xl transition-transform hover:scale-110"
-            title="Credits / About"
+            onClick={onOpenSettings}
+            className="text-2xl transition-transform hover:scale-110 cursor-pointer"
+            title="Settings"
           >
-            🙌
+            ⚙️
           </a>
+
+
+
         </div>
       </div>
     </div>

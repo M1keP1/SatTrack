@@ -5,6 +5,7 @@ import { SatelliteInfoPanel } from "./satellite-info-panel";
 import { AIChatComponent } from "./ai-chat-component";
 import { useSatelliteDetails } from "@/hooks/useSatelliteDetails";
 
+
 interface ModularInfoSidebarProps {
   selectedNoradId: string | null;
   onExpandedChange?: (expanded: boolean) => void;
@@ -13,6 +14,9 @@ interface ModularInfoSidebarProps {
   isGroundStationEnabled?: boolean;
   onOpenSkyglow?: () => void;
   onOpenCloud?: () => void;
+  onOpenSettings?: () => void;
+  onOpenContact?: () => void;
+  onOpenPromo?: () => void;
 }
 
 export function ModularInfoSidebar({
@@ -22,6 +26,9 @@ export function ModularInfoSidebar({
   isGroundStationEnabled,
   onOpenSkyglow,
   onOpenCloud,
+  onOpenSettings,
+  onOpenContact,
+  onOpenPromo,
 }: ModularInfoSidebarProps) {
   const [aiExpanded, setAiExpanded] = useState(false);
 
@@ -37,7 +44,12 @@ const satellite = useSatelliteDetails(selectedNoradId);
   };
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 w-72 bg-teal-900/20 backdrop-blur border-l border-teal-400/30 text-white flex flex-col z-50 overflow-hidden">
+    <div
+  className={`fixed right-0 top-0 bottom-0 ${
+    aiExpanded ? "w-[36rem]" : "w-72"
+  } bg-teal-900/20 backdrop-blur border-l border-teal-400/30 text-white flex flex-col z-50 overflow-hidden transition-all duration-300`}
+    >
+
       {aiExpanded ? (
         <AIChatComponent 
            
@@ -67,6 +79,9 @@ const satellite = useSatelliteDetails(selectedNoradId);
               isGroundStationEnabled={isGroundStationEnabled ?? false}
               onOpenSkyglow={onOpenSkyglow ?? (() => {})}
               onOpenCloud={onOpenCloud ?? (() => {})}
+              onOpenSettings={onOpenSettings}
+              onOpenContact={onOpenContact}
+              onOpenPromo={onOpenPromo}
             />
           </div>
 
