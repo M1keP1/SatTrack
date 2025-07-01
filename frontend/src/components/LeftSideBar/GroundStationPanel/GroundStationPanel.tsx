@@ -121,10 +121,16 @@ export function GroundStationPanel({
   return (
     <div className={containerClass}>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 font-semibold text-sm">
-          <FaMapMarkerAlt className="text-green-400" />
-          <span>Ground Station</span>
-        </div>
+          <div className="relative group flex items-center gap-2 font-semibold text-sm cursor-default">
+            <FaMapMarkerAlt className="text-green-400" />
+            <span>Ground Station</span>
+
+            {/* Tooltip */}
+            <div className="absolute left-0 top-full mt-1 z-50 hidden group-hover:block bg-black/90 text-white text-xs p-2 rounded-md shadow-lg border border-white/20 w-64">
+              🛰️ Coming soon: Coverage rings and pass prediction tables!
+            </div>
+          </div>
+
         <Button
           variant="ghost"
           size="icon"

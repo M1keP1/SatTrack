@@ -7,7 +7,7 @@ export default function CustomToaster() {
       position="top-center"
       toastOptions={{
         style: {
-          background: "rgba(17, 24, 39, 0.85)", // dark translucent
+          background: "rgba(17, 24, 39, 0.85)", 
           color: "#e5e7eb",                     // tailwind gray-200
           border: "1px solid rgba(255, 255, 255, 0.1)",
           backdropFilter: "blur(2px)",
@@ -15,6 +15,7 @@ export default function CustomToaster() {
           fontSize: "14px",
           padding: "12px 16px",
           borderRadius: "12px",
+          marginTop: "", 
         },
         duration: 3000,
         success: {

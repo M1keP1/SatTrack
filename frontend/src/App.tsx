@@ -10,7 +10,11 @@ import { ModularInfoSidebar } from "./components/RightSideBar/modular-info-sideb
 import { SkyglowPanel } from "@/components/RightSideBar/SkyglowPanel";
 import { CloudPanel } from "@/components/RightSideBar/CloudPanel";
 import CustomToaster from "./components/CustomToaster";
-
+import SettingsPanel from "./components/RightSideBar/SettingsPanel";
+import { useCinematicCamera } from "./hooks/useCinematicCamera";
+import ContactPanel from "./components/RightSideBar/ContactPanel";
+import IdeaPanel from "./components/RightSideBar/IdeaPanel";
+import { usePanelCameraZoom } from "./hooks/usePanelCameraZoom";
 
 function App() {
   const viewerRef = useRef<Viewer | null>(null);
@@ -26,12 +30,19 @@ function App() {
   const handleSearch = useSatelliteSearch(viewerRef, satellites, setTrackedId, setCurrentTLE);
   const [showSkyglow, setShowSkyglow] = useState(false);
   const [showCloud, setShowCloud] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const [showContact, setShowContact] = useState(false);
+  const [showIdea, setShowIdea] = useState(false);
+  const { zoomIn, zoomOut, saveDefaultView } = usePanelCameraZoom(viewerRef);
+
+  useCinematicCamera(viewerRef, showSplash);
   useClickOutside(viewerRef, trackedId, setTrackedId);
 
   useEffect(() => {
   const timeout = setTimeout(() => {
     setShowSplash(false);
+    saveDefaultView();
   }, 3500); // or hook into Cesium readiness
 
   return () => clearTimeout(timeout);
@@ -72,11 +83,44 @@ function App() {
         isGroundStationEnabled={isGroundStationEnabled}
         onOpenSkyglow={() => setShowSkyglow(true)}
         onOpenCloud={() => setShowCloud(true)}
+        onOpenSettings={() => setShowSettings(true)}
+        onOpenContact={() => setShowContact(true)}
+        onOpenPromo={() => setShowIdea(true)}
       />
 
       <SkyglowPanel isOpen={showSkyglow} onClose={() => setShowSkyglow(false)} />
       <CloudPanel isOpen={showCloud} onClose={() => setShowCloud(false)} groundStation={groundStation ?? undefined} />
+      {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+      {showContact && (
+        <ContactPanel
+          onClose={() => {
+            setShowContact(false);
+            zoomIn();
+          }}
+          onOpenEffect={zoomOut}
+        />
+      )}
+
+      {showIdea && (
+        <IdeaPanel
+          onClose={() => {
+            setShowIdea(false);
+            zoomIn();
+          }}
+          onOpenContact={() => {
+            setShowIdea(false);
+            setShowContact(true);
+            zoomOut();
+          }}
+          onOpenEffect={zoomOut}
+        />
+      )}
       {!showSplash && <CustomToaster />}
+      <footer className="absolute bottom-0 w-full text-center text-xs text-white/40 font-mono pb-2 pointer-events-none z-[10]">
+        <div className="mx-auto max-w-fit rounded-lg bg-black/20 backdrop-blur px-4 py-1 border border-teal-400/20 shadow-sm">
+          © {new Date().getFullYear()} <span className="text-white">🛰️SatTrack™</span> · All rights reserved
+        </div>
+      </footer>
 
     </div>
       );
