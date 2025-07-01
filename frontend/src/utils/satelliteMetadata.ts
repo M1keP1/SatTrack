@@ -1,7 +1,7 @@
-export function getOperator(noradId: string): string {
+export function getOperator(): string {
   return "-----"; // Placeholder
 }
 
-export function getSatelliteType(noradId: string): string {
+export function getSatelliteType(): string {
   return "-----"; // Placeholder
 }
