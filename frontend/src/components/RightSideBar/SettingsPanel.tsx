@@ -1,19 +1,40 @@
+/**
+ * This file is part of the SatTrack project, submitted for academic purposes only.
+ * It is intended solely for evaluation in an educational context.
+ */
+
 import { SlidePanel } from "@/components/RightSideBar/slidepanel";
 import { useEffect, useState } from "react";
 import { useToasterStore } from "react-hot-toast";
 
+// ==========================
+// 🛠️ SettingsPanel Component
+// ==========================
+
+/**
+ * Displays toggle options for visual and audio settings.
+ * Automatically closes when a toast appears (after a toggle).
+ * Currently all toggles are placeholders for future implementation.
+ */
 export default function SettingsPanel({ onClose }: { onClose: () => void }) {
   const { toasts } = useToasterStore();
   const [isClosing, setIsClosing] = useState(false);
 
-  // Auto-close when toast appears
+  // ==========================
+  // ⏳ Auto-Close Logic
+  // ==========================
+
   useEffect(() => {
     const isToastVisible = toasts.some((t) => t.visible);
     if (isToastVisible && !isClosing) {
       setIsClosing(true);
-      setTimeout(() => onClose(), 250); // delay to allow exit animation
+      setTimeout(() => onClose(), 250); // small delay for fade-out animation
     }
   }, [toasts]);
+
+  // ==========================
+  // 🧱 Render Panel
+  // ==========================
 
   return (
     <div
@@ -30,6 +51,7 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
         title="🛠️ Settings"
         position="top-center"
       >
+        {/* Settings Placeholder */}
         <div className="pt-4 space-y-4 mt-1 font-mono text-white text-sm">
           {[
             "Satellite Trails",

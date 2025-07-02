@@ -1,7 +1,18 @@
+// ════════════════════════════════════════════════════════════════════════
+// 📁 satelliteManager.ts
+// 🛰️ Utility functions for computing satellite positions from TLEs
+// 🔒 Submitted as part of an academic project (SatTrack)
+// 📌 Purpose: Educational demonstration only. Not intended for production.
+// ════════════════════════════════════════════════════════════════════════
+
 import { Cartesian3 } from "cesium";
 import { twoline2satrec, propagate, gstime, eciToGeodetic } from "satellite.js";
 import type { TleEntry } from "../utils/tleParser";
 
+// ════════════════════════════════════════════════════════════════════════
+// 📦 SatellitePosition Type
+// Represents a satellite's basic metadata and computed position.
+// ════════════════════════════════════════════════════════════════════════
 export type SatellitePosition = {
   name: string;
   id: string;
@@ -12,6 +23,13 @@ export type SatellitePosition = {
   };
 };
 
+// ════════════════════════════════════════════════════════════════════════
+// 🔭 computePositionFromTLE
+// Description:
+//   - Converts a TLE entry into a satellite.js record
+//   - Propagates its current position
+//   - Returns a Cesium-compatible Cartesian3 coordinate (or null if failed)
+// ════════════════════════════════════════════════════════════════════════
 export function computePositionFromTLE(tle: TleEntry): SatellitePosition {
   const satrec = twoline2satrec(tle.line1, tle.line2);
   const date = new Date();
@@ -41,7 +59,11 @@ export function computePositionFromTLE(tle: TleEntry): SatellitePosition {
   };
 }
 
-
+// ════════════════════════════════════════════════════════════════════════
+// 📡 getSatellitePositions
+// Description:
+//   - Maps a list of TLEs into real-time positions for all satellites.
+// ════════════════════════════════════════════════════════════════════════
 export function getSatellitePositions(tles: TleEntry[]): SatellitePosition[] {
   return tles.map(computePositionFromTLE);
 }

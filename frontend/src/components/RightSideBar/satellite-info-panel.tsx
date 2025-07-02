@@ -1,8 +1,15 @@
+/**
+ * This file is part of the SatTrack project, submitted for academic purposes only.
+ * It is intended solely for evaluation in an educational context.
+ */
+
 import { usePassPrediction, type GroundTrackResult } from "@/hooks/usePassPrediction";
 import { useEffect } from "react";
 
+// ==========================
+// 📦 Props
+// ==========================
 
-// Interface for satellite info props
 interface SatelliteInfo {
   noradId: number;
   name: string;
@@ -14,7 +21,6 @@ interface SatelliteInfo {
   operator: string;
 }
 
-// Props expected by this component
 interface SatelliteInfoPanelProps {
   selectedSatellite: SatelliteInfo | null;
   tle: { line1: string; line2: string } | null;
@@ -27,25 +33,13 @@ interface SatelliteInfoPanelProps {
   onOpenPromo?: () => void;
 }
 
-// Panel to display selected satellite's live information
+// ==========================
+// 🛰️ Satellite Info Panel
+// ==========================
+
 /**
- * Displays detailed information about the currently selected satellite, including
- * its coordinates, NORAD ID, name, altitude, velocity, and pass predictions relative
- * to a ground station. Also provides controls for toggling skyglow and cloud overlays,
- * and quick links to external resources such as Stellarium and project documentation.
- *
- * @param selectedSatellite - The currently selected satellite object, or `null` if none is selected.
- * @param tle - The TLE (Two-Line Element) data string for the selected satellite.
- * @param groundStation - The ground station coordinates and configuration.
- * @param isGroundStationEnabled - Whether the ground station view and calculations are enabled.
- * @param onOpenSkyglow - Callback to open the skyglow overlay or modal.
- * @param onOpenCloud - Callback to open the cloud overlay or modal.
- *
- * @remarks
- * - Uses a fallback display if no satellite is selected.
- * - Utilizes a custom hook (`usePassPrediction`) to compute satellite pass data.
- * - Renders a visual compass and pass info for the ground station view.
- * - Includes links to external resources and project support.
+ * Displays detailed satellite information along with ground station visibility,
+ * pass prediction data, external links, and controls to open overlays and settings.
  */
 export function SatelliteInfoPanel({
   selectedSatellite,
@@ -58,7 +52,6 @@ export function SatelliteInfoPanel({
   onOpenContact,
   onOpenPromo,
 }: SatelliteInfoPanelProps) {
-  // Use fallback if no satellite is selected
   const displayData = selectedSatellite || {
     noradId: 0,
     name: "",
@@ -69,7 +62,8 @@ export function SatelliteInfoPanel({
     satelliteType: "",
     operator: "",
   };
-  // Debug logs for prop changes
+
+  // Log changes for debugging
   useEffect(() => {
     console.log("🔍 [SatelliteInfoPanel] Props changed:", {
       tle,
@@ -78,7 +72,7 @@ export function SatelliteInfoPanel({
     });
   }, [tle, groundStation, isGroundStationEnabled]);
 
-  // Custom hook to calculate satellite pass data based on ground station
+  // Calculate pass prediction based on current TLE and ground station
   const passData: GroundTrackResult | null = usePassPrediction(
     tle,
     groundStation,
@@ -89,7 +83,10 @@ export function SatelliteInfoPanel({
 
   return (
     <div className="flex flex-col h-full min-h-0 overflow-y-auto space-y-4">
-      {/* Coordinate Info */}
+      
+      {/* ========================== */}
+      {/* 🌍 Coordinates */}
+      {/* ========================== */}
       <div className="grid grid-cols-2 gap-2 flex-shrink-0">
         {["Longitude", "Latitude"].map((label, i) => (
           <div key={label} className="bg-teal-800/20 backdrop-blur-sm rounded-lg p-2 border border-teal-400/20 text-center">
@@ -103,7 +100,9 @@ export function SatelliteInfoPanel({
         ))}
       </div>
 
-      {/* Main Satellite Info */}
+      {/* ========================== */}
+      {/* 📋 Satellite Details */}
+      {/* ========================== */}
       <div className="flex-1 space-y-3 overflow-hidden">
         {[
           { label: "NORAD ID", value: selectedSatellite ? displayData.noradId : "-----" },
@@ -127,14 +126,14 @@ export function SatelliteInfoPanel({
                 : label === "Velocity"
                 ? "text-cyan-400"
                 : "text-white font-semibold"
-            }`}>
-              {value}
-            </div>
+            }`}>{value}</div>
           </div>
         ))}
       </div>
 
-      {/* Ground Station View */}
+      {/* ========================== */}
+      {/* 🧭 Ground Station Panel */}
+      {/* ========================== */}
       <div className="bg-teal-800/20 backdrop-blur-sm rounded-lg p-3 border border-teal-400/20 ">
         <h3 className={`text-xs font-medium text-center mb-2 ${
           isGroundStationEnabled ? "text-white" : "text-amber-400"
@@ -142,19 +141,17 @@ export function SatelliteInfoPanel({
           {isGroundStationEnabled ? "Ground Station View" : "⚠️ Ground Station View Disabled"}
         </h3>
 
-        {/* Horizon Compass Display */}
+        {/* Compass + Elevation Arc */}
         <div className="relative w-full h-24 mx-auto mb-2 bg-gradient-to-t from-teal-900/40 to-transparent rounded-lg border border-teal-400/20 overflow-hidden">
           <div className="absolute bottom-0 left-0 right-0 h-px bg-teal-400/60" />
           <div className="absolute bottom-1 left-2 text-xs text-teal-300/60">W</div>
           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs text-teal-300/60">S</div>
           <div className="absolute bottom-1 right-2 text-xs text-teal-300/60">E</div>
           <div className="absolute top-1 left-1/2 -translate-x-1/2 text-xs text-teal-300/60">N</div>
-
-          {/* Satellite Position Indicator */}
           <div className="absolute bottom-4 left-2/3 w-2 h-2 bg-teal-400 rounded-full animate-pulse" />
           <div className="absolute bottom-6 left-2/3 text-xs text-teal-400 -translate-x-1/2">SAT</div>
 
-          {/* Elevation Arc */}
+          {/* Arc Path */}
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 100">
             <path
               d="M 20 80 Q 100 40 180 80"
@@ -166,7 +163,7 @@ export function SatelliteInfoPanel({
           </svg>
         </div>
 
-        {/* Pass Info Display */}
+        {/* Azimuth, Elevation, Range */}
         <div className="grid grid-cols-3 gap-1 mb-3 text-xs">
           {[
             { label: "Azimuth", value: passData?.azimuth, suffix: "°" },
@@ -175,11 +172,14 @@ export function SatelliteInfoPanel({
           ].map(({ label, value, suffix }) => (
             <div key={label} className="text-center bg-teal-900/30 rounded p-1 border border-teal-400/20">
               <div className="text-teal-300/80 mb-0.5">{label}</div>
-              <div className="text-teal-400 font-mono">{value != null ? `${Math.round(value)}${suffix}` : `--${suffix}`}</div>
+              <div className="text-teal-400 font-mono">
+                {value != null ? `${Math.round(value)}${suffix}` : `--${suffix}`}
+              </div>
             </div>
           ))}
         </div>
 
+        {/* Next Pass & Duration */}
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div className="text-center bg-teal-900/30 rounded p-1.5 border border-teal-400/20">
             <div className="text-xs text-teal-300/80 mb-0.5">Next Pass</div>
@@ -187,7 +187,7 @@ export function SatelliteInfoPanel({
               {passData?.nextPassStartLocal
                 ? new Date(passData.nextPassStartLocal).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 : "--:--"}
-              </div>
+            </div>
           </div>
           <div className="text-center bg-teal-900/30 rounded p-1.5 border border-teal-400/20">
             <div className="text-xs text-teal-300/80 mb-0.5">Duration</div>
@@ -199,7 +199,7 @@ export function SatelliteInfoPanel({
           </div>
         </div>
 
-        {/* Stellarium Redirect */}
+        {/* External Tool Link */}
         <a
           href="https://stellarium-web.org/"
           target="_blank"
@@ -212,7 +212,7 @@ export function SatelliteInfoPanel({
           (Manual satellite search required)
         </p>
 
-        {/* Skyglow & Cloud Toggles */}
+        {/* Overlay Toggles */}
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={onOpenSkyglow}
@@ -229,7 +229,9 @@ export function SatelliteInfoPanel({
         </div>
       </div>
 
-      {/* Footer with Links */}
+      {/* ========================== */}
+      {/* ⚙️ Footer Links */}
+      {/* ========================== */}
       <div className="font-mono bg-teal-800/20 backdrop-blur-sm rounded-lg p-3 border border-teal-400/20 text-center mt-3 space-y-2">
         <div className="flex justify-center gap-3">
           <a
@@ -241,11 +243,9 @@ export function SatelliteInfoPanel({
           >
             💙
           </a>
-          
+
           <a
-            onClick={() => {
-              onOpenContact?.();
-            }}
+            onClick={() => onOpenContact?.()}
             className="text-2xl transition-transform hover:scale-110 cursor-pointer"
             title="Contact / Get Updates"
           >
@@ -261,15 +261,13 @@ export function SatelliteInfoPanel({
           </a>
 
           <a
-            href="#"
-           
-            rel="noopener noreferrer"
             onClick={() => alert("Supporters orbit coming soon!")}
-            className="text-2xl transition-transform hover:scale-110"
+            className="text-2xl transition-transform hover:scale-110 cursor-pointer"
             title="Supporters Orbit"
           >
             👩‍🚀
           </a>
+
           <a
             onClick={onOpenSettings}
             className="text-2xl transition-transform hover:scale-110 cursor-pointer"
@@ -277,9 +275,6 @@ export function SatelliteInfoPanel({
           >
             ⚙️
           </a>
-
-
-
         </div>
       </div>
     </div>

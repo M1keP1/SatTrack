@@ -1,4 +1,13 @@
+/**
+ * This file is part of the SatTrack project, submitted for academic purposes only.
+ * It is intended solely for evaluation in an educational context.
+ */
+
 import { SlidePanel } from "@/components/RightSideBar/slidepanel";
+
+// ==========================
+// ☁️ CloudPanel Props
+// ==========================
 
 interface CloudPanelProps {
   isOpen: boolean;
@@ -6,11 +15,21 @@ interface CloudPanelProps {
   groundStation?: { lat: number; lon: number; name: string };
 }
 
+// ==========================
+// ☁️ CloudPanel Component
+// ==========================
+
+/**
+ * Displays a weather overlay panel with live cloud and radar data.
+ * Uses RainViewer API, centered around the selected ground station.
+ */
 export function CloudPanel({ isOpen, onClose, groundStation }: CloudPanelProps) {
-  const lat = groundStation?.lat ?? 49.8728; // 📍 Darmstadt
+  // Fallback to Darmstadt if no station selected
+  const lat = groundStation?.lat ?? 49.8728;
   const lon = groundStation?.lon ?? 8.6512;
   const locationName = groundStation?.name ?? "Darmstadt";
 
+  // RainViewer iframe URL with clouds & radar layers
   const iframeSrc = `https://www.rainviewer.com/map.html?loc=${lat.toFixed(
     4
   )},${lon.toFixed(
@@ -24,7 +43,7 @@ export function CloudPanel({ isOpen, onClose, groundStation }: CloudPanelProps) 
       title="☁️ Cloud Radar Map"
       position="right-center"
     >
-      {/* Info text with tooltip icon */}
+      {/* ℹ️ Info text + tooltip */}
       <div className="text-xs mb-2 font-mono text-white flex items-center gap-1">
         Weather view centered on: <span className="text-teal-300">{locationName}</span>
         <div className="relative group">
@@ -45,7 +64,7 @@ export function CloudPanel({ isOpen, onClose, groundStation }: CloudPanelProps) 
         </div>
       </div>
 
-      {/* Embedded iframe map */}
+      {/* 🌍 Embedded Map */}
       <div className="relative w-full h-72 overflow-hidden rounded-lg border border-white/20">
         <iframe
           src={iframeSrc}
@@ -53,7 +72,7 @@ export function CloudPanel({ isOpen, onClose, groundStation }: CloudPanelProps) 
           height="135%"
           style={{
             border: "0",
-            marginTop: "-23%",
+            marginTop: "-23%", // centers the map better visually
             borderRadius: "0.5rem",
           }}
           allowFullScreen

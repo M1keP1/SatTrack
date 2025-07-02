@@ -1,3 +1,8 @@
+/**
+ * 📘 SatTrack Viewer Component
+ * This file is part of the SatTrack academic project and is submitted solely for evaluation purposes.
+ */
+
 import { Viewer } from "resium";
 import { Ion } from "cesium";
 import SatelliteEntities from "./SatelliteEntities";
@@ -6,6 +11,7 @@ import type { SatellitePosition } from "../services/satelliteManager";
 import { useEffect } from "react";
 import * as Cesium from "cesium";
 
+// ⛽️ Auth token for Cesium assets
 Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwOTkzNWYyMS1mMDIzLTRhMWItYWIxZS0wZjdmM2UzZDExYTYiLCJpZCI6MzAzMzk1LCJpYXQiOjE3NDc1MTc4MzB9.xVdwgbTzZJ1XrAk3BCb2K1W4lfkEpNUfAALkXe8pElA";
 
 type GlobeProps = {
@@ -17,32 +23,38 @@ type GlobeProps = {
   setCurrentTLE: (tle: { line1: string; line2: string } | null) => void;
 };
 
-const Globe: React.FC<GlobeProps> = ({ viewerRef, satellites, setSatellites, trackedId, setTrackedId, setCurrentTLE }) => {
+const Globe: React.FC<GlobeProps> = ({
+  viewerRef,
+  satellites,
+  setSatellites,
+  trackedId,
+  setTrackedId,
+  setCurrentTLE
+}) => {
+  useEffect(() => {
+    setTimeout(() => {
+      const viewer = viewerRef.current;
+      if (!viewer) {
+        console.error("❌ Cesium viewer still not ready.");
+        return;
+      }
 
-    useEffect(() => {
-      setTimeout(() => {
-        const viewer = viewerRef.current;
-        if (!viewer) {
-          console.error("❌ Cesium viewer still not ready.");
-          return;
-        }
-  
-        console.log("🌌 Setting custom skybox");
-        viewer.scene.skyBox = new Cesium.SkyBox({
-          sources: {
-            positiveX: "/skybox/px.png",
-            negativeX: "/skybox/nx.png",
-            positiveY: "/skybox/py.png",
-            negativeY: "/skybox/ny.png",
-            positiveZ: "/skybox/pz.png",
-            negativeZ: "/skybox/nz.png",
-          },
-        });
-        viewer.scene.skyAtmosphere.show = false;
-        viewer.scene.globe.show = true;
-      }, 3099); // wait 1s after mount
-    }, []);
-    
+      console.log("🌌 Setting custom skybox");
+      viewer.scene.skyBox = new Cesium.SkyBox({
+        sources: {
+          positiveX: "/skybox/px.png",
+          negativeX: "/skybox/nx.png",
+          positiveY: "/skybox/py.png",
+          negativeY: "/skybox/ny.png",
+          positiveZ: "/skybox/pz.png",
+          negativeZ: "/skybox/nz.png",
+        },
+      });
+      viewer.scene.skyAtmosphere.show = false;
+      viewer.scene.globe.show = true;
+    }, 3099);
+  }, []);
+
   return (
     <Viewer
       full
@@ -63,17 +75,14 @@ const Globe: React.FC<GlobeProps> = ({ viewerRef, satellites, setSatellites, tra
       navigationHelpButton={false}
       fullscreenButton={false}
     >
-    <SatelliteEntities 
-      satellites={satellites} 
-      setSatellites={setSatellites}
-      trackedId={trackedId} 
-      setTrackedId={setTrackedId}
-      setCurrentTLE={setCurrentTLE}
-    />
-
+      <SatelliteEntities 
+        satellites={satellites} 
+        setSatellites={setSatellites}
+        trackedId={trackedId} 
+        setTrackedId={setTrackedId}
+        setCurrentTLE={setCurrentTLE}
+      />
     </Viewer>
-    
-
   );
 };
 

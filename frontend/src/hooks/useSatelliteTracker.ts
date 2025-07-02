@@ -1,4 +1,3 @@
-// hooks/useSatelliteTracker.ts
 import { useEffect, useRef } from "react";
 import { parseTleText } from "../utils/tleParser";
 import { getSatellitePositions } from "../services/satelliteManager";
@@ -6,6 +5,17 @@ import type { SatellitePosition } from "../services/satelliteManager";
 import { getActiveTleFile } from "../services/activeCollection";
 import type { TleEntry } from "../utils/tleParser";
 import toast from "react-hot-toast";
+
+// ════════════════════════════════════════════════════════════════════════
+// 🛰️ useSatelliteTracker Hook
+// Description:
+//    - Fetches active TLE file (local or remote).
+//    - Parses TLE data and updates satellite positions in real-time.
+//    - Compares and notifies if new satellites are added/removed.
+//    - Intended for live Cesium visualization in SatTrack app.
+// Parameters:
+//    - setSatellites: Callback to update tracked satellite positions.
+// ════════════════════════════════════════════════════════════════════════
 
 export function useSatelliteTracker(setSatellites: (sats: SatellitePosition[]) => void) {
   const trackedSatIdsRef = useRef<Set<string>>(new Set());
@@ -56,8 +66,8 @@ export function useSatelliteTracker(setSatellites: (sats: SatellitePosition[]) =
 
     loadTleFile();
     updatePositions();
-    fileCheckInterval = setInterval(loadTleFile, 1000);
-    positionUpdateInterval = setInterval(updatePositions, 10);
+    fileCheckInterval = setInterval(loadTleFile, 1000);        // Check for new TLEs
+    positionUpdateInterval = setInterval(updatePositions, 10); // Refresh satellite positions
 
     return () => {
       clearInterval(fileCheckInterval);

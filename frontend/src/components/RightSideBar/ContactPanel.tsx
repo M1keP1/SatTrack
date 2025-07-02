@@ -1,12 +1,29 @@
+/**
+ * This file is part of the SatTrack project, submitted for academic purposes only.
+ * It is intended solely for evaluation in an educational context.
+ */
+
 import { SlidePanel } from "@/components/RightSideBar/slidepanel";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+
+// ==========================
+// 📦 Props
+// ==========================
 
 type ContactPanelProps = {
   onClose: () => void;
   onOpenEffect?: () => void;
 };
 
+// ==========================
+// 📬 ContactPanel Component
+// ==========================
+
+/**
+ * Contact form panel to submit requests, feedback, or collaboration ideas.
+ * Data is submitted to Formspree endpoint and confirmed with toast messages.
+ */
 export default function ContactPanel({ onClose, onOpenEffect }: ContactPanelProps) {
   const [formData, setFormData] = useState({
     name: "",
@@ -16,9 +33,14 @@ export default function ContactPanel({ onClose, onOpenEffect }: ContactPanelProp
     message: "",
   });
 
+  // Run entry animation or effect when opened
   useEffect(() => {
     onOpenEffect?.();
   }, []);
+
+  // ==========================
+  // 🧠 Form State Change
+  // ==========================
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -26,28 +48,36 @@ export default function ContactPanel({ onClose, onOpenEffect }: ContactPanelProp
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  // ==========================
+  // 🚀 Form Submission
+  // ==========================
 
-  try {
-    const response = await fetch("https://formspree.io/f/xyzjoalq", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    if (response.ok) {
-      toast("📬 Message signaled successfully!");
-      onClose();
-    } else {
-      toast("❌ Failed to send message.");
+    try {
+      const response = await fetch("https://formspree.io/f/xyzjoalq", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast("📬 Message signaled successfully!");
+        onClose();
+      } else {
+        toast("❌ Failed to send message.");
+      }
+    } catch (error) {
+      toast.error("❌ Network error.");
     }
-  } catch (error) {
-    toast.error("❌ Network error.");
-  }
-};
+  };
+
+  // ==========================
+  // 🧱 Render
+  // ==========================
 
   return (
     <SlidePanel isOpen={true} onClose={onClose} title="📬 Contact Me" position="center">
@@ -55,6 +85,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         onSubmit={handleSubmit}
         className="space-y-4 text-sm text-white font-mono [text-shadow:none]"
       >
+        {/* Name Field */}
         <div className="space-y-1">
           <span className="text-xs">Name</span>
           <input
@@ -66,6 +97,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           />
         </div>
 
+        {/* Email Field */}
         <div className="space-y-1">
           <span className="text-xs">Email</span>
           <input
@@ -78,6 +110,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           />
         </div>
 
+        {/* Category Dropdown */}
         <div className="space-y-1">
           <span className="text-xs">Category</span>
           <select
@@ -92,6 +125,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </select>
         </div>
 
+        {/* Subject Dropdown */}
         <div className="space-y-1">
           <span className="text-xs">Reason</span>
           <select
@@ -108,6 +142,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </select>
         </div>
 
+        {/* Message Textarea */}
         <div className="space-y-1">
           <span className="text-xs">Message</span>
           <textarea
@@ -120,6 +155,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           />
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
           className="w-full !bg-teal-600/30 hover:bg-teal-600/50 transition-colors border border-teal-400/30 rounded py-2 font-bold"

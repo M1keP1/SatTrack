@@ -1,7 +1,16 @@
+/**
+ * This file is part of the SatTrack project, submitted for academic purposes only.
+ * It is intended solely for evaluation in an educational context.
+ */
+
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import Fuse from "fuse.js";
 import { motion, AnimatePresence } from "framer-motion";
+
+// ==========================
+// 📦 Props
+// ==========================
 
 type SearchBarProps = {
   onSearch: (query: string) => void;
@@ -9,11 +18,27 @@ type SearchBarProps = {
   onSubmitDone?: () => void;
 };
 
-export default function SearchBar({ onSearch, suggestions, onSubmitDone }: SearchBarProps) {
+// ==========================
+// 🔍 SearchBar Component
+// ==========================
+
+/**
+ * Smart satellite search bar with keyboard/autocomplete suggestions
+ * using fuzzy search (Fuse.js) and animated dropdown.
+ */
+export default function SearchBar({
+  onSearch,
+  suggestions,
+  onSubmitDone,
+}: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [matched, setMatched] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [manualInput, setManualInput] = useState(true);
+
+  // ==========================
+  // 🔍 Update Matches on Query Change
+  // ==========================
 
   useEffect(() => {
     const term = query.trim().toLowerCase();
@@ -36,6 +61,10 @@ export default function SearchBar({ onSearch, suggestions, onSubmitDone }: Searc
     setSelectedIndex(0);
   }, [query, suggestions]);
 
+  // ==========================
+  // ⌨️ Handle Search Submission
+  // ==========================
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = query.trim();
@@ -52,6 +81,10 @@ export default function SearchBar({ onSearch, suggestions, onSubmitDone }: Searc
     setMatched([]);
     setSelectedIndex(0);
   };
+
+  // ==========================
+  // ⌨️ Handle Keyboard Navigation
+  // ==========================
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (matched.length === 0) return;
@@ -81,6 +114,10 @@ export default function SearchBar({ onSearch, suggestions, onSubmitDone }: Searc
     }
   };
 
+  // ==========================
+  // 🖱️ Handle Suggestion Click
+  // ==========================
+
   const handleSuggestionClick = (satName: string) => {
     onSearch(satName);
     onSubmitDone?.();
@@ -88,6 +125,10 @@ export default function SearchBar({ onSearch, suggestions, onSubmitDone }: Searc
     setMatched([]);
     setSelectedIndex(0);
   };
+
+  // ==========================
+  // ✨ Highlight Matching Text
+  // ==========================
 
   const highlightMatch = (text: string) => {
     const input = query.trim().toLowerCase();
@@ -109,10 +150,14 @@ export default function SearchBar({ onSearch, suggestions, onSubmitDone }: Searc
     );
   };
 
+  // ==========================
+  // 🧱 Render
+  // ==========================
+
   return (
     <form onSubmit={handleSubmit} className="relative z-10 w-full">
       <div className="w-full transition-all duration-300 ease-in-out">
-        {/* Search input */}
+        {/* Search Input */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-4 w-4" />
           <input
@@ -132,7 +177,7 @@ export default function SearchBar({ onSearch, suggestions, onSubmitDone }: Searc
           />
         </div>
 
-        {/* Animated Suggestions Dropdown */}
+        {/* Autocomplete Dropdown */}
         <AnimatePresence>
           {matched.length > 0 && query.trim() !== "" && !query.startsWith("/") && (
             <motion.div

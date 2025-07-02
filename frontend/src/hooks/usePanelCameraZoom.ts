@@ -50,6 +50,6 @@ export function usePanelCameraZoom(viewerRef: React.RefObject<Viewer | null>) {
     zoomTo,
     zoomOut,
     zoomIn,
-    saveDefaultView, // ← use this after splash or wherever you want to "set" the default view
+    saveDefaultView, 
   };
 }

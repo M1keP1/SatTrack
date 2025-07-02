@@ -1,3 +1,8 @@
+/**
+ * This file is part of the SatTrack project, submitted for academic purposes only.
+ * It is intended solely for evaluation in an educational context.
+ */
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
@@ -5,6 +10,9 @@ import { SatelliteInfoPanel } from "./satellite-info-panel";
 import { AIChatComponent } from "./ai-chat-component";
 import { useSatelliteDetails } from "@/hooks/useSatelliteDetails";
 
+// ==========================
+// 📦 Props
+// ==========================
 
 interface ModularInfoSidebarProps {
   selectedNoradId: string | null;
@@ -19,6 +27,14 @@ interface ModularInfoSidebarProps {
   onOpenPromo?: () => void;
 }
 
+// ==========================
+// 📘 ModularInfoSidebar Component
+// ==========================
+
+/**
+ * Sidebar showing satellite details and an optional AI chat panel.
+ * Expands to 36rem when AI is active, otherwise stays compact.
+ */
 export function ModularInfoSidebar({
   selectedNoradId,
   tle,
@@ -31,33 +47,30 @@ export function ModularInfoSidebar({
   onOpenPromo,
 }: ModularInfoSidebarProps) {
   const [aiExpanded, setAiExpanded] = useState(false);
+  const satellite = useSatelliteDetails(selectedNoradId);
 
-const satellite = useSatelliteDetails(selectedNoradId);
+  // Toggle AI panel visibility
+  const handleAiToggle = () => setAiExpanded(true);
+  const handleAiClose = () => setAiExpanded(false);
 
-
-  const handleAiToggle = () => {
-    setAiExpanded(true);
-  };
-
-  const handleAiClose = () => {
-    setAiExpanded(false);
-  };
+  // ==========================
+  // 🧱 Render
+  // ==========================
 
   return (
     <div
-  className={`fixed right-0 top-0 bottom-0 ${
-    aiExpanded ? "w-[36rem]" : "w-72"
-  } bg-teal-900/20 backdrop-blur border-l border-teal-400/30 text-white flex flex-col z-50 overflow-hidden transition-all duration-300`}
+      className={`fixed right-0 top-0 bottom-0 ${
+        aiExpanded ? "w-[36rem]" : "w-72"
+      } bg-teal-900/20 backdrop-blur border-l border-teal-400/30 text-white flex flex-col z-50 overflow-hidden transition-all duration-300`}
     >
-
       {aiExpanded ? (
-        <AIChatComponent 
-           
-          onClose={handleAiClose} 
-        />
+        // 🤖 AI Assistant Panel
+        <AIChatComponent onClose={handleAiClose} />
       ) : (
+        // 🛰️ Default Satellite Info View
         <div className="flex flex-col h-full transition-all duration-300 ease-out">
-          {/* AI Toggle Button at Top */}
+          
+          {/* Ask AI Button */}
           <div className="p-4 border-b border-teal-400/20 flex-shrink-0">
             <Button
               onClick={handleAiToggle}
@@ -68,14 +81,20 @@ const satellite = useSatelliteDetails(selectedNoradId);
             </Button>
           </div>
 
-          {/* Satellite Info Panel (with padding & scroll) */}
+          {/* Satellite Information */}
           <div className="flex-1 p-4 overflow-y-auto">
             <SatelliteInfoPanel
-              selectedSatellite={satellite ? { ...satellite, noradId: Number(satellite.noradId) } : null}
+              selectedSatellite={
+                satellite
+                  ? { ...satellite, noradId: Number(satellite.noradId) }
+                  : null
+              }
               tle={tle ?? null}
-              groundStation={groundStation
-                ? { lat: groundStation.lat, lon: groundStation.lon, alt: 0 }
-                : null}
+              groundStation={
+                groundStation
+                  ? { lat: groundStation.lat, lon: groundStation.lon, alt: 0 }
+                  : null
+              }
               isGroundStationEnabled={isGroundStationEnabled ?? false}
               onOpenSkyglow={onOpenSkyglow ?? (() => {})}
               onOpenCloud={onOpenCloud ?? (() => {})}
@@ -84,8 +103,6 @@ const satellite = useSatelliteDetails(selectedNoradId);
               onOpenPromo={onOpenPromo}
             />
           </div>
-
-
         </div>
       )}
     </div>

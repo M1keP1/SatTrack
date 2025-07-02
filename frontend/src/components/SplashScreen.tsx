@@ -1,3 +1,12 @@
+/**
+ * 🛰️ SatTrack SplashScreen Component
+ * Displays an animated intro message and logo during app load.
+ * Includes a typewriter effect and mobile warning.
+ *
+ * 🔒 This source is part of an academic project and is intended solely
+ * for educational evaluation and non-commercial purposes.
+ */
+
 import { useEffect, useState } from "react";
 
 export default function SplashScreen() {

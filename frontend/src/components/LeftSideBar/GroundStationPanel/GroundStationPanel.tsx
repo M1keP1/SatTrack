@@ -1,3 +1,8 @@
+/**
+ * This file is part of the SatTrack project, submitted for academic purposes only.
+ * It is intended solely for evaluation in an educational context.
+ */
+
 import { useState } from "react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -8,6 +13,11 @@ import type { RefObject } from "react";
 import type { Viewer } from "cesium";
 import { geocodeAndFlyTo } from "@/services/geocodeAndFlyTo";
 import { getCoordinatesByName } from "@/services/getCoordinatesByName";
+
+// ==========================
+// 📦 Props
+// ==========================
+
 interface GroundStationPanelProps {
   viewerRef: RefObject<Viewer | null>;
   onGroundStationChange?: (location: { lat: number; lon: number; name: string } | null) => void;
@@ -18,6 +28,14 @@ interface GroundStationPanelProps {
   setUserLocation: (loc: { lat: number; lon: number; name: string } | null) => void;
 }
 
+// ==========================
+// 🧩 Component
+// ==========================
+
+/**
+ * GroundStationPanel allows users to enable/disable a virtual ground station and
+ * set its location manually or via geolocation.
+ */
 export function GroundStationPanel({
   viewerRef,
   onGroundStationChange,
@@ -25,23 +43,27 @@ export function GroundStationPanel({
   setGroundStationActive,
   userLocation,
   setUserLocation,
-}: GroundStationPanelProps)
- {
-
+}: GroundStationPanelProps) {
   const [locationQuery, setLocationQuery] = useState("");
 
+  // ==========================
+  // 📍 Fallback Location
+  // ==========================
 
   const fallbackLocation = () => {
     const fallback = { lat: 49.8728, lon: 8.6512, name: "Darmstadt" };
     setUserLocation(fallback);
     setGroundStationActive(true);
-
     onGroundStationChange?.(fallback);
     if (viewerRef.current) {
       geocodeAndFlyTo(viewerRef.current, fallback.name, 10);
     }
     toast("📍 Fallback to Darmstadt");
   };
+
+  // ==========================
+  // 📡 Get User Location
+  // ==========================
 
   const getUserLocation = () => {
     if ("geolocation" in navigator) {
@@ -50,13 +72,13 @@ export function GroundStationPanel({
           const loc = {
             lat: pos.coords.latitude,
             lon: pos.coords.longitude,
-            name: "Darmstadt", // Default dummy name, can be updated later
+            name: "Darmstadt", // Placeholder
           };
           setUserLocation(loc);
           setGroundStationActive(true);
           onGroundStationChange?.(loc);
           if (viewerRef.current) {
-            geocodeAndFlyTo(viewerRef.current,loc.name,10);
+            geocodeAndFlyTo(viewerRef.current, loc.name, 10);
           }
           console.log("📍 [User Location] Called geocodeAndFlyTo with:", loc.name);
           toast.success(`📡 Ground station set to ${loc.name}`);
@@ -68,6 +90,9 @@ export function GroundStationPanel({
     }
   };
 
+  // ==========================
+  // 🖱️ Enable/Disable Toggle
+  // ==========================
 
   const handleSetLocationClick = () => {
     if (groundStationActive) {
@@ -80,15 +105,18 @@ export function GroundStationPanel({
     }
   };
 
+  // ==========================
+  // 🔍 Manual Location Search
+  // ==========================
+
   const setLocationFromQuery = async () => {
     const trimmed = locationQuery.trim();
-    const cleaned = trimmed.replace(/^["']|["']$/g, ""); // Remove quotes
+    const cleaned = trimmed.replace(/^["']|["']$/g, ""); // Remove extra quotes
 
     if (!cleaned) return;
 
     try {
       console.log("📡 [Manual Location] Attempting geocode:", cleaned);
-      
       let success = false;
       if (viewerRef.current) {
         success = await geocodeAndFlyTo(viewerRef.current, cleaned, 10);
@@ -98,7 +126,8 @@ export function GroundStationPanel({
         const coords = await getCoordinatesByName(viewerRef.current!, cleaned);
         const location = coords
           ? { lat: coords.lat, lon: coords.lon, name: cleaned }
-          : { lat: 0, lon: 0, name: cleaned }; // fallback if coords not found
+          : { lat: 0, lon: 0, name: cleaned }; // fallback
+
         setUserLocation(location);
         setGroundStationActive(true);
         onGroundStationChange?.(location);
@@ -112,6 +141,9 @@ export function GroundStationPanel({
     }
   };
 
+  // ==========================
+  // 🧱 Render UI
+  // ==========================
 
   const containerClass = cn(
     "rounded-xl p-4 border backdrop-blur-sm text-white space-y-4 transition",
@@ -120,17 +152,19 @@ export function GroundStationPanel({
 
   return (
     <div className={containerClass}>
+      {/* 🗺️ Header */}
       <div className="flex items-center justify-between">
-          <div className="relative group flex items-center gap-2 font-semibold text-sm cursor-default">
-            <FaMapMarkerAlt className="text-green-400" />
-            <span>Ground Station</span>
+        <div className="relative group flex items-center gap-2 font-semibold text-sm cursor-default">
+          <FaMapMarkerAlt className="text-green-400" />
+          <span>Ground Station</span>
 
-            {/* Tooltip */}
-            <div className="absolute left-0 top-full mt-1 z-50 hidden group-hover:block bg-black/90 text-white text-xs p-2 rounded-md shadow-lg border border-white/20 w-64">
-              🛰️ Coming soon: Coverage rings and pass prediction tables!
-            </div>
+          {/* Tooltip */}
+          <div className="absolute left-0 top-full mt-1 z-50 hidden group-hover:block bg-black/90 text-white text-xs p-2 rounded-md shadow-lg border border-white/20 w-64">
+            🛰️ Coming soon: Coverage rings and pass prediction tables!
           </div>
+        </div>
 
+        {/* Enable/Disable Button */}
         <Button
           variant="ghost"
           size="icon"
@@ -145,6 +179,7 @@ export function GroundStationPanel({
         </Button>
       </div>
 
+      {/* 🔍 Manual Location Input */}
       <div className="space-y-2 text-sm">
         <div className="text-white/60 text-xs">Search Location:</div>
         <div className="flex gap-2">
@@ -168,6 +203,7 @@ export function GroundStationPanel({
         </div>
       </div>
 
+      {/* 📍 Active Location Info */}
       {groundStationActive && userLocation && (
         <div className="space-y-2 text-xs text-white/70">
           <div className="flex justify-between">
