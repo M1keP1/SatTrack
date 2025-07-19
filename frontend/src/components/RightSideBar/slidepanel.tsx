@@ -64,7 +64,7 @@ export function SlidePanel({
       initial={{ y: 300, opacity: 0 }}
       animate={{ y: isOpen ? 0 : 300, opacity: isOpen ? 1 : 0 }}
       transition={{ type: "spring", stiffness: 260, damping: 25 }}
-      className={`fixed bottom-6 transform ${positionClass} w-96 z-50
+      className={`fixed bottom-6 transform ${positionClass} w-96 z-120
         bg-teal-900/20 backdrop-blur-sm border border-teal-400/30
         rounded-2xl p-4 [text-shadow:none]`}
     >

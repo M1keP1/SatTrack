@@ -41,6 +41,9 @@ function App() {
   const [currentTLE, setCurrentTLE] = useState<{ line1: string; line2: string } | null>(null);
   const [groundStation, setGroundStation] = useState<{ lat: number; lon: number; name: string } | null>(null);
   const isGroundStationEnabled = groundStation !== null;
+  const [isTooSmall, setIsTooSmall] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  
 
   // ─── Panels & UI Toggles ─────────────────────────
   const [showSkyglow, setShowSkyglow] = useState(false);
@@ -49,6 +52,7 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [showContact, setShowContact] = useState(false);
   const [showIdea, setShowIdea] = useState(false);
+
 
   // ─── Camera Zoom & Cinematics ────────────────────
   const { zoomIn, zoomOut, saveDefaultView } = usePanelCameraZoom(viewerRef);
@@ -67,10 +71,44 @@ function App() {
     return () => clearTimeout(timeout);
   }, []);
 
+  useEffect(() => {
+    const checkSize = () => {
+      const minWidth = 600;
+      const minHeight = 920;
+      const collapseWidth = 1000;
+
+      setIsTooSmall(window.innerWidth < minWidth || window.innerHeight < minHeight);
+
+      // collapse sidebar below 800px
+      if (window.innerWidth < collapseWidth) {
+        setIsSidebarCollapsed(true);
+      } else {
+        setIsSidebarCollapsed(false);
+      }
+    };
+
+    checkSize();
+    window.addEventListener("resize", checkSize);
+    return () => window.removeEventListener("resize", checkSize);
+  }, []);
+
+  
+  if (isTooSmall) {
+  return (
+    <div className="fixed inset-0 bg-black text-white flex flex-col items-center justify-center text-center p-6 z-[99999]">
+      <div className="animate-pulse text-3xl font-mono mb-4">🛰️ SatTrack</div>
+      <p className="text-white/80 text-sm max-w-md">
+        ⚠️ SatTrack requires a minimum screen size of <strong>600x930</strong>. <br />
+        Please use a larger screen or resize your browser to continue.
+      </p>
+    </div>
+  );
+}
+
   // ══════════════════════════════════════════════════
   // 🌐 Render UI
   // ══════════════════════════════════════════════════
-
+  
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       {/* ─── Splash Screen ───────────────────────── */}
@@ -98,6 +136,8 @@ function App() {
         satelliteNames={satellites.map((s) => s.name)}
         viewerRef={viewerRef}
         ongroundStationChange={setGroundStation}
+        collapsed={isSidebarCollapsed}
+        setCollapsed={setIsSidebarCollapsed}
       />
 
       {/* ─── Right Info Sidebar ───────────────────── */}
@@ -109,8 +149,14 @@ function App() {
         onOpenSkyglow={() => setShowSkyglow(true)}
         onOpenCloud={() => setShowCloud(true)}
         onOpenSettings={() => setShowSettings(true)}
-        onOpenContact={() => setShowContact(true)}
-        onOpenPromo={() => setShowIdea(true)}
+        onOpenContact={() => {
+          setShowIdea(false);
+          setShowContact(true);
+        }}
+        onOpenPromo={() => {
+          setShowContact(false);
+          setShowIdea(true);
+        }}
       />
 
       {/* ─── Panels (Conditional Rendering) ───────── */}

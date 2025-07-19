@@ -20,6 +20,8 @@ type SidebarProps = {
   satelliteNames: string[];
   viewerRef: RefObject<Viewer | null>;
   ongroundStationChange?: (location: { lat: number; lon: number; name: string } | null) => void;
+  collapsed: boolean;                 
+  setCollapsed: (value: boolean) => void;
 };
 
 // ==========================
@@ -31,8 +33,9 @@ export default function Sidebar({
   satelliteNames,
   viewerRef,
   ongroundStationChange,
+  collapsed,
+  setCollapsed,
 }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
   const [groundStationActive, setGroundStationActive] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number; name: string } | null>(null);
 
@@ -86,7 +89,7 @@ export default function Sidebar({
           </div>
 
           {/* 📦 Sidebar Content */}
-          <div className="flex flex-col gap-4 p-4 overflow-y-auto">
+          <div className="flex flex-col gap-4 p-4 overflow-y-auto scrollbar-none">
 
             {/* 🔍 Search */}
             <div className="bg-teal-900/30 border border-teal-400/20 backdrop-blur-sm rounded-xl p-3 shadow-sm w-full font-mono text-teal-400">

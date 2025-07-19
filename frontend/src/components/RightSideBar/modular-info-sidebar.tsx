@@ -61,7 +61,7 @@ export function ModularInfoSidebar({
     <div
       className={`fixed right-0 top-0 bottom-0 ${
         aiExpanded ? "w-[36rem]" : "w-72"
-      } bg-teal-900/20 backdrop-blur border-l border-teal-400/30 text-white flex flex-col z-50 overflow-hidden transition-all duration-300`}
+      } bg-teal-900/20 backdrop-blur border-l border-teal-400/30 text-white flex flex-col z-100 overflow-hidden transition-all duration-300`}
     >
       {aiExpanded ? (
         // 🤖 AI Assistant Panel

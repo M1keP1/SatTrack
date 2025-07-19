@@ -60,7 +60,7 @@ export default function CollectionsPanel() {
   // ==========================
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4 shadow-sm w-full max-h-[80vh] overflow-y-auto">
+    <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4 shadow-sm w-full max-h-[80vh] overflow-y-auto scrollbar-none">
       
       {/* 🌐 Collections Header */}
       <div className="flex items-center justify-between text-white text-sm mb-4">
