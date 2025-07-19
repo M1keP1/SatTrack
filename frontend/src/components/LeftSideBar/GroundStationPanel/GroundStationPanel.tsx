@@ -56,7 +56,7 @@ export function GroundStationPanel({
     setGroundStationActive(true);
     onGroundStationChange?.(fallback);
     if (viewerRef.current) {
-      geocodeAndFlyTo(viewerRef.current, fallback.name, 10);
+      //geocodeAndFlyTo(viewerRef.current, fallback.name, 10);
     }
     toast("📍 Fallback to Darmstadt");
   };
@@ -78,7 +78,7 @@ export function GroundStationPanel({
           setGroundStationActive(true);
           onGroundStationChange?.(loc);
           if (viewerRef.current) {
-            geocodeAndFlyTo(viewerRef.current, loc.name, 10);
+            //geocodeAndFlyTo(viewerRef.current, loc.name, 10);
           }
           console.log("📍 [User Location] Called geocodeAndFlyTo with:", loc.name);
           toast.success(`📡 Ground station set to ${loc.name}`);
@@ -119,7 +119,7 @@ export function GroundStationPanel({
       console.log("📡 [Manual Location] Attempting geocode:", cleaned);
       let success = false;
       if (viewerRef.current) {
-        success = await geocodeAndFlyTo(viewerRef.current, cleaned, 10);
+        success = await geocodeAndFlyTo(viewerRef.current, cleaned, 5);
       }
 
       if (success) {

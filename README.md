@@ -150,19 +150,6 @@ frontend/src/
 
 ---
 
-## 👥 Group Members & Contributions
-
-The SatTrack project was developed collaboratively by the following team members as part of a course project. Each member contributed to different components of the app to ensure both technical and user experience goals were met:
-
-| Name           | Student ID | Contributions                                                                                                                                                                                            |
-| -------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mihir K. Patel | 1123669    | Lead Developer: Core architecture, Cesium globe integration, real-time TLE tracker, orbit propagation, right sidebar logic, splash screen, cloud radar overlay, custom hooks, and deployment integration |
-| Shrey Sethi    | 1123132    | Ground Station UI layout and design, sidebar animations, collection switching UX, and settings panel styling                                                                                             |
-| Manish Banjade | 1123983    | Slide-out panel transitions, skyglow overlay UI, Compatibility testing                                                                                            |
-| Bashir Iqbal   | 1125790    | Satellite hover effect enhancements, utility hook refactoring, search bar interaction QA, and accessibility refinements                                                                                  |
-| Hoai Anh Phan  | 1123315    | Info panel UI card layout, contact panel polish, iconography consistency, and final build metadata review                                                                                                |
-
----
 
 ## 🧠 AI Assistant (Upcoming Feature)
 

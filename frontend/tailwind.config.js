@@ -33,6 +33,5 @@ export default {
     },
   },
   plugins: [
-    require("tailwind-scrollbar"),
-  ],
+    require("tailwind-scrollbar",'tailwind-scrollbar-hide')],
 };
