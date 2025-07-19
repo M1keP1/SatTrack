@@ -12,7 +12,7 @@ import { useEffect } from "react";
 import * as Cesium from "cesium";
 
 // ⛽️ Auth token for Cesium assets
-Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwOTkzNWYyMS1mMDIzLTRhMWItYWIxZS0wZjdmM2UzZDExYTYiLCJpZCI6MzAzMzk1LCJpYXQiOjE3NDc1MTc4MzB9.xVdwgbTzZJ1XrAk3BCb2K1W4lfkEpNUfAALkXe8pElA";
+Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_TOKEN;
 
 type GlobeProps = {
   viewerRef: React.MutableRefObject<CesiumViewer | null>;
