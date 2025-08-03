@@ -128,6 +128,8 @@ function App() {
         trackedId={trackedId}
         setTrackedId={setTrackedId}
         setCurrentTLE={setCurrentTLE}
+        userLocation={groundStation}
+        groundStationActive={isGroundStationEnabled}
       />
 
       {/* ─── Left Sidebar ────────────────────────── */}
