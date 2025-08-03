@@ -67,7 +67,7 @@ export function useSatelliteTracker(setSatellites: (sats: SatellitePosition[]) =
     loadTleFile();
     updatePositions();
     fileCheckInterval = setInterval(loadTleFile, 1000);        // Check for new TLEs
-    positionUpdateInterval = setInterval(updatePositions, 1000); // Refresh satellite positions
+    positionUpdateInterval = setInterval(updatePositions, 100); // Refresh satellite positions
 
     return () => {
       clearInterval(fileCheckInterval);
