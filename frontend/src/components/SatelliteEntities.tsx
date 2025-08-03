@@ -1,17 +1,14 @@
-/**
- * 📘 SatTrack SatelliteEntities Component
- * This file renders all tracked satellite entities on the Cesium globe.
- * Includes hover/follow modes, live polling via useSatelliteTracker,
- * and label styling. Built as part of an academic project for UI/HCI purposes.
- */
-
 import { useEffect, useRef, useState } from "react";
 import { Entity } from "resium";
-import { Color, Entity as CesiumEntity, Viewer as CesiumViewer, Cartesian2 } from "cesium";
-import toast from "react-hot-toast";
-import { useSatelliteTracker } from "../hooks/useSatelliteTracker";
-import type { SatellitePosition } from "../services/satelliteManager";
 import {
+  Color,
+  Cartesian2,
+  Cartesian3,
+  Cartographic,
+  Ellipsoid,
+  Math as CesiumMath,
+  Entity as CesiumEntity,
+  Viewer as CesiumViewer,
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
   NearFarScalar,
@@ -19,7 +16,10 @@ import {
   VerticalOrigin,
   LabelStyle,
 } from "cesium";
+import toast from "react-hot-toast";
+import { useSatelliteTracker } from "../hooks/useSatelliteTracker";
 import { getTLEByNorad } from "@/services/tleService";
+import type { SatellitePosition } from "../services/satelliteManager";
 
 type Props = {
   satellites: SatellitePosition[];
@@ -27,7 +27,28 @@ type Props = {
   trackedId: string | null;
   setTrackedId: (id: string | null) => void;
   setCurrentTLE?: (tle: { line1: string; line2: string } | null) => void;
+  activeGroundStation: { lat: number; lon: number; alt?: number } | null;
 };
+
+// ✅ Line-of-sight visibility calculation
+function isVisibleFromGroundStation(
+  satellitePosition: Cartesian3,
+  groundStation: { lat: number; lon: number; alt?: number }
+): boolean {
+  const ellipsoid = Ellipsoid.WGS84;
+  const gsCartographic = Cartographic.fromDegrees(
+    groundStation.lon,
+    groundStation.lat,
+    groundStation.alt || 0
+  );
+  const gsCartesian = ellipsoid.cartographicToCartesian(gsCartographic);
+  const gsToSat = Cartesian3.subtract(satellitePosition, gsCartesian, new Cartesian3());
+  const gsNormal = ellipsoid.geodeticSurfaceNormal(gsCartesian, new Cartesian3());
+  const angleRad = Cartesian3.angleBetween(gsToSat, gsNormal);
+  const ELEVATION_THRESHOLD_DEG = 5; 
+  return angleRad < CesiumMath.toRadians(90 - ELEVATION_THRESHOLD_DEG);
+ 
+}
 
 export default function SatelliteEntities({
   satellites,
@@ -35,12 +56,14 @@ export default function SatelliteEntities({
   trackedId,
   setTrackedId,
   setCurrentTLE,
+  activeGroundStation,
 }: Props) {
   const entityRefs = useRef<Record<string, CesiumEntity>>({});
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   useSatelliteTracker(setSatellites);
 
+  // 🛰️ Track entity when clicked
   useEffect(() => {
     const viewer = (window as any).cesiumViewer as CesiumViewer | undefined;
     if (!viewer) return;
@@ -53,12 +76,12 @@ export default function SatelliteEntities({
     }
   }, [trackedId]);
 
+  // 🖱️ Handle hover
   useEffect(() => {
     const viewer = (window as any).cesiumViewer as CesiumViewer | undefined;
     if (!viewer) return;
 
     const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
-
     handler.setInputAction((movement: any) => {
       const picked = viewer.scene.pick(movement.endPosition);
       const id = picked?.id?.id ?? null;
@@ -68,12 +91,12 @@ export default function SatelliteEntities({
     return () => handler.destroy();
   }, []);
 
+  // 👆 Handle left click
   useEffect(() => {
     const viewer = (window as any).cesiumViewer as CesiumViewer | undefined;
     if (!viewer) return;
 
     const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
-
     handler.setInputAction(async (movement: any) => {
       const picked = viewer.scene.pick(movement.position);
       const pickedId = picked?.id?.id;
@@ -85,16 +108,10 @@ export default function SatelliteEntities({
       try {
         const cleanedId = pickedId.replace(/[Uu]$/, "").trim();
         const tle = await getTLEByNorad(cleanedId);
-
-        if (tle && setCurrentTLE) {
-          setCurrentTLE(tle);
-          console.log("🛰️ Fetched & set TLE from server for:", pickedId);
-        } else {
-          console.warn("❌ No TLE found for:", pickedId);
-          setCurrentTLE?.(null);
-        }
+        setCurrentTLE?.(tle || null);
       } catch (err) {
         console.error("❌ Error fetching TLE:", err);
+        setCurrentTLE?.(null);
       }
     }, ScreenSpaceEventType.LEFT_CLICK);
 
@@ -103,8 +120,15 @@ export default function SatelliteEntities({
 
   return (
     <>
-      {satellites.map((sat) =>
-        sat.position ? (
+      {satellites.map((sat) => {
+        if (!sat.position) return null;
+
+        let isInRange = false;
+        if (activeGroundStation && sat.position) {
+          isInRange = isVisibleFromGroundStation(sat.position, activeGroundStation);
+        }
+
+        return (
           <Entity
             key={sat.id}
             id={sat.id}
@@ -121,6 +145,8 @@ export default function SatelliteEntities({
               color:
                 trackedId === sat.id
                   ? Color.fromCssColorString("#34d399")
+                  : isInRange
+                  ? Color.fromCssColorString("#34d399").withAlpha(0.9)
                   : hoveredId === sat.id
                   ? Color.fromCssColorString("#bbf7d0")
                   : Color.WHITE,
@@ -151,8 +177,8 @@ export default function SatelliteEntities({
             }
             description={`<p>${sat.name}</p>`}
           />
-        ) : null
-      )}
+        );
+      })}
     </>
   );
 }
